@@ -1,0 +1,56 @@
+From 47b324c365d5899831d21833bc5fd3496b496962 Mon Sep 17 00:00:00 2001
+From: surapunoyousei <ryosukeusuusu@gmail.com>
+Date: Sun, 26 Jun 2022 18:06:09 +0900
+Subject: [PATCH 07/24] update private newtab desgin
+
+---
+ .../content/aboutPrivateBrowsing.css          | 35 ++++++++++++++++---
+ 1 file changed, 31 insertions(+), 4 deletions(-)
+
+diff --git a/browser/components/privatebrowsing/content/aboutPrivateBrowsing.css b/browser/components/privatebrowsing/content/aboutPrivateBrowsing.css
+index 26d143a7b0..ef67b5530c 100644
+--- a/browser/components/privatebrowsing/content/aboutPrivateBrowsing.css
++++ b/browser/components/privatebrowsing/content/aboutPrivateBrowsing.css
+@@ -2,7 +2,34 @@
+  * License, v. 2.0. If a copy of the MPL was not distributed with this
+  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+ 
+-html.private .showNormal,
+-html.normal .showPrivate {
+-  display: none !important;
+-}
++ html.private .showNormal,
++ html.normal .showPrivate {
++   display: none !important;
++ }
++ 
++ .wordmark{
++   background-size: 20em !important;
++   width: 24rem !important;
++ }
++ 
++ #search-handoff-button{
++   border-radius: 5px;
++   background-color: #5e5e5e;
++   border: solid 0.1px black;
++ }
++ 
++ #search-handoff-button .fake-textbox {
++   color: white !important;
++ }
++ 
++ body{
++   background-color: #242424 !important;
++ }
++ 
++ .promo.below-search{
++   display: none !important;
++ }
++ 
++ .info{
++   background-color: #3f3f3f !important;
++ }
+\ No newline at end of file
+-- 
+2.25.1
+

@@ -1,0 +1,56 @@
+From 8acaef50312b536cb95f2166c0f7d075dd1b5762 Mon Sep 17 00:00:00 2001
+From: surapunoyousei <ryosukeusuusu@gmail.com>
+Date: Sun, 26 Jun 2022 18:56:37 +0900
+Subject: [PATCH 24/24] Change various build options
+
+---
+ browser/confvars.sh   | 8 +++++++-
+ browser/moz.configure | 6 +++---
+ 2 files changed, 10 insertions(+), 4 deletions(-)
+
+diff --git a/browser/confvars.sh b/browser/confvars.sh
+index 6fa324be93..aa6504ce0a 100755
+--- a/browser/confvars.sh
++++ b/browser/confvars.sh
+@@ -3,7 +3,9 @@
+ # License, v. 2.0. If a copy of the MPL was not distributed with this
+ # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ 
+-MOZ_APP_VENDOR=Mozilla
++MOZ_APP_VENDOR="Ablaze"
++MOZ_APP_BASENAME=Floorp
++MOZ_UPDATER=1
+ 
+ if test "$OS_ARCH" = "WINNT"; then
+   if ! test "$HAVE_64BIT_BUILD"; then
+@@ -41,3 +43,7 @@ MOZ_PROFILE_MIGRATOR=1
+ 
+ # Include the DevTools client, not just the server (which is the default)
+ MOZ_DEVTOOLS=all
++
++MOZ_REQUIRE_SIGNING=
++MOZ_TELEMETRY_REPORTING=
++MOZ_INCLUDE_SOURCE_INFO=1
+\ No newline at end of file
+diff --git a/browser/moz.configure b/browser/moz.configure
+index 8653bcbb16..277314a4e1 100644
+--- a/browser/moz.configure
++++ b/browser/moz.configure
+@@ -5,11 +5,11 @@
+ # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ 
+ imply_option("MOZ_PLACES", True)
+-imply_option("MOZ_SERVICES_HEALTHREPORT", True)
++imply_option("MOZ_SERVICES_HEALTHREPORT", False)
+ imply_option("MOZ_SERVICES_SYNC", True)
+ imply_option("MOZ_DEDICATED_PROFILES", True)
+-imply_option("MOZ_BLOCK_PROFILE_DOWNGRADE", True)
+-imply_option("MOZ_NORMANDY", True)
++imply_option("MOZ_BLOCK_PROFILE_DOWNGRADE", False)
++imply_option("MOZ_NORMANDY", False)
+ 
+ with only_when(target_is_linux & compile_environment):
+     option(env="MOZ_NO_PIE_COMPAT", help="Enable non-PIE wrapper")
+-- 
+2.25.1
+

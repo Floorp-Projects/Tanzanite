@@ -1,0 +1,2261 @@
+From e21e89247f7696ddb409e79dbf04465285e82bb6 Mon Sep 17 00:00:00 2001
+From: surapunoyousei <ryosukeusuusu@gmail.com>
+Date: Sun, 26 Jun 2022 17:39:29 +0900
+Subject: [PATCH 01/24] Replace "Firefox" with "Floorp"
+
+---
+ browser/app/Makefile.in                       |   2 +-
+ ...refox.exe.manifest => floorp.exe.manifest} |   4 +-
+ browser/app/module.ver                        |   6 +-
+ .../browser_preXULSkeletonUIRegistry.js       |  10 +-
+ browser/branding/official/branding.nsi        |   6 +-
+ browser/branding/official/configure.sh        |   2 +-
+ browser/components/BrowserContentHandler.jsm  |   2 +-
+ browser/components/BrowserGlue.jsm            |   4 +-
+ .../xpcshell/test_ext_pkcs11_management.js    |   2 +-
+ .../installerprefs/InstallerPrefs.jsm         |   2 +-
+ .../components/migration/MigrationUtils.jsm   |   2 +-
+ browser/components/preferences/main.js        |   2 +-
+ browser/components/shell/ShellService.jsm     |   4 +-
+ .../shell/WindowsDefaultBrowser.cpp           |   2 +-
+ browser/components/shell/WindowsUserChoice.h  |   2 +-
+ .../shell/nsWindowsShellService.cpp           |   8 +-
+ browser/installer/windows/app.tag             |   2 +-
+ browser/installer/windows/nsis/defines.nsi.in |  14 +-
+ browser/installer/windows/nsis/installer.nsi  |  60 +++---
+ .../nsis/maintenanceservice_installer.nsi     |  14 +-
+ browser/installer/windows/nsis/shared.nsh     | 202 +++++++++---------
+ browser/installer/windows/nsis/stub.nsi       |  40 ++--
+ .../installer/windows/nsis/uninstaller.nsi    |  76 +++----
+ browser/installer/windows/stub.tag            |   2 +-
+ dom/media/gmp/GMPChild.cpp                    |   6 +-
+ layout/base/PresShell.cpp                     |   4 +-
+ modules/libpref/init/all.js                   |   2 +-
+ .../tests/xpcshell/test_web_channel.js        |   6 +-
+ testing/mozbase/mozcrash/mozcrash/mozcrash.py |   6 +-
+ .../configs/raptor/windows_config.py          |   2 +-
+ .../configs/raptor/windows_vm_config.py       |   2 +-
+ testing/talos/talos/mtio-allowlist.json       |  10 +-
+ .../talos/talos/xtalos/xperf_allowlist.json   |   2 +-
+ .../tests/memory-reports-diff1.json           |   2 +-
+ .../tests/memory-reports-diff2.json           |   2 +-
+ .../tests/browser/browser_policies_gpo.js     |  26 +--
+ .../test/xpcshell/head_native_messaging.js    |   2 +-
+ .../test/xpcshell/test_ext_storage_managed.js |   2 +-
+ .../test/xpcshell/test_native_manifests.js    |   2 +-
+ .../maintenanceservice_installer.nsi          |  14 +-
+ .../client/crashreporter_win.cpp              |   2 +-
+ .../tools/windows/converter_exe/converter.cc  |   2 +-
+ toolkit/mozapps/defaultagent/Policy.cpp       |   2 +-
+ .../defaultagent/SetDefaultBrowser.cpp        |   6 +-
+ .../tests/gtest/SetDefaultBrowserTest.cpp     |   6 +-
+ .../extensions/test/xpcshell/test_registry.js |  22 +-
+ .../mozapps/installer/windows/nsis/common.nsh |  34 +--
+ toolkit/mozapps/update/UpdateTelemetry.jsm    |   2 +-
+ toolkit/mozapps/update/common/pathhash.cpp    |   2 +-
+ toolkit/mozapps/update/common/updatehelper.h  |   2 +-
+ .../update/tests/data/xpcshellUtilsAUS.js     |   2 +-
+ toolkit/xre/PolicyChecks.h                    |   2 +-
+ widget/windows/WinTaskbar.cpp                 |   2 +-
+ widget/windows/tests/TestUrisToValidate.h     |  12 +-
+ xpcom/tests/TestWinReg.js                     |   2 +-
+ 55 files changed, 330 insertions(+), 330 deletions(-)
+ rename browser/app/{firefox.exe.manifest => floorp.exe.manifest} (96%)
+
+diff --git a/browser/app/Makefile.in b/browser/app/Makefile.in
+index 54d6b43fe1..ada16bbb0a 100644
+--- a/browser/app/Makefile.in
++++ b/browser/app/Makefile.in
+@@ -31,7 +31,7 @@ ifeq ($(OS_ARCH),WINNT)
+ # (this dependency should really be just for firefox.exe, not other targets)
+ # Note the manifest file exists in the tree, so we use the explicit filename
+ # here.
+-EXTRA_DEPS += $(srcdir)/firefox.exe.manifest
++EXTRA_DEPS += $(srcdir)/floorp.exe.manifest
+ endif
+ 
+ PROGRAMS_DEST = $(DIST)/bin
+diff --git a/browser/app/firefox.exe.manifest b/browser/app/floorp.exe.manifest
+similarity index 96%
+rename from browser/app/firefox.exe.manifest
+rename to browser/app/floorp.exe.manifest
+index 995b2fc869..43942461f3 100644
+--- a/browser/app/firefox.exe.manifest
++++ b/browser/app/floorp.exe.manifest
+@@ -3,10 +3,10 @@
+ <assemblyIdentity
+         version="1.0.0.0"
+         processorArchitecture="*"
+-        name="Firefox"
++        name="Floorp"
+         type="win32"
+ />
+-<description>Firefox</description>
++<description>Floorp</description>
+ <dependency>
+         <dependentAssembly>
+                 <assemblyIdentity
+diff --git a/browser/app/module.ver b/browser/app/module.ver
+index 5ef8d2a02a..4352e89988 100644
+--- a/browser/app/module.ver
++++ b/browser/app/module.ver
+@@ -1,8 +1,8 @@
+-WIN32_MODULE_COMPANYNAME=Mozilla Corporation
+-WIN32_MODULE_COPYRIGHT=�Firefox and Mozilla Developers; available under the MPL 2 license.
++WIN32_MODULE_COMPANYNAME=Ablaze
++WIN32_MODULE_COPYRIGHT=Floorp; available under the MPL 2 license.
+ WIN32_MODULE_PRODUCTVERSION=@MOZ_APP_WINVERSION@
+ WIN32_MODULE_PRODUCTVERSION_STRING=@MOZ_APP_VERSION@
+-WIN32_MODULE_TRADEMARKS=Firefox is a Trademark of The Mozilla Foundation.
++WIN32_MODULE_TRADEMARKS=Floorp is a Trademark of The Ablaze.
+ WIN32_MODULE_DESCRIPTION=@MOZ_APP_DISPLAYNAME@
+ WIN32_MODULE_PRODUCTNAME=@MOZ_APP_DISPLAYNAME@
+ WIN32_MODULE_NAME=@MOZ_APP_DISPLAYNAME@
+diff --git a/browser/base/content/test/startup/browser_preXULSkeletonUIRegistry.js b/browser/base/content/test/startup/browser_preXULSkeletonUIRegistry.js
+index b5f19610f2..6adf5b18a7 100644
+--- a/browser/base/content/test/startup/browser_preXULSkeletonUIRegistry.js
++++ b/browser/base/content/test/startup/browser_preXULSkeletonUIRegistry.js
+@@ -57,7 +57,7 @@ add_task(async function testWritesEnabledOnPrefChange() {
+   const firefoxPath = getFirefoxExecutableFile().path;
+   let enabled = WindowsRegistry.readRegKey(
+     Ci.nsIWindowsRegKey.ROOT_KEY_CURRENT_USER,
+-    "Software\\Mozilla\\Firefox\\PreXULSkeletonUISettings",
++    "Software\\Ablaze\\Floorp\\PreXULSkeletonUISettings",
+     `${firefoxPath}|Enabled`
+   );
+   is(enabled, 1, "Pre-XUL skeleton UI is enabled in the Windows registry");
+@@ -65,7 +65,7 @@ add_task(async function testWritesEnabledOnPrefChange() {
+   Services.prefs.setBoolPref("browser.startup.preXulSkeletonUI", false);
+   enabled = WindowsRegistry.readRegKey(
+     Ci.nsIWindowsRegKey.ROOT_KEY_CURRENT_USER,
+-    "Software\\Mozilla\\Firefox\\PreXULSkeletonUISettings",
++    "Software\\Ablaze\\Floorp\\PreXULSkeletonUISettings",
+     `${firefoxPath}|Enabled`
+   );
+   is(enabled, 0, "Pre-XUL skeleton UI is disabled in the Windows registry");
+@@ -74,7 +74,7 @@ add_task(async function testWritesEnabledOnPrefChange() {
+   Services.prefs.setIntPref("browser.tabs.inTitlebar", 0);
+   enabled = WindowsRegistry.readRegKey(
+     Ci.nsIWindowsRegKey.ROOT_KEY_CURRENT_USER,
+-    "Software\\Mozilla\\Firefox\\PreXULSkeletonUISettings",
++    "Software\\Ablaze\\Floorp\\PreXULSkeletonUISettings",
+     `${firefoxPath}|Enabled`
+   );
+   is(enabled, 0, "Pre-XUL skeleton UI is disabled in the Windows registry");
+@@ -107,7 +107,7 @@ add_task(async function testPersistsNecessaryValuesOnChange() {
+   for (let key of regKeys) {
+     WindowsRegistry.removeRegKey(
+       Ci.nsIWindowsRegKey.ROOT_KEY_CURRENT_USER,
+-      "Software\\Mozilla\\Firefox\\PreXULSkeletonUISettings",
++      "Software\\Ablaze\\Floorp\\PreXULSkeletonUISettings",
+       key
+     );
+   }
+@@ -117,7 +117,7 @@ add_task(async function testPersistsNecessaryValuesOnChange() {
+   for (let key of regKeys) {
+     let value = readRegKeyExtended(
+       Ci.nsIWindowsRegKey.ROOT_KEY_CURRENT_USER,
+-      "Software\\Mozilla\\Firefox\\PreXULSkeletonUISettings",
++      "Software\\Ablaze\\Floorp\\PreXULSkeletonUISettings",
+       `${firefoxPath}|${key}`
+     );
+     isnot(
+diff --git a/browser/branding/official/branding.nsi b/browser/branding/official/branding.nsi
+index bbdead7e4a..4817183263 100644
+--- a/browser/branding/official/branding.nsi
++++ b/browser/branding/official/branding.nsi
+@@ -8,9 +8,9 @@
+ 
+ # BrandFullNameInternal is used for some registry and file system values
+ # instead of BrandFullName and typically should not be modified.
+-!define BrandFullNameInternal "Mozilla Firefox"
+-!define BrandFullName         "Mozilla Firefox"
+-!define CompanyName           "Mozilla Corporation"
++!define BrandFullNameInternal "Floorp"
++!define BrandFullName         "Floorp"
++!define CompanyName           "Ablaze"
+ !define URLInfoAbout          "https://www.mozilla.org"
+ !define URLUpdateInfo         "https://www.mozilla.org/firefox/${AppVersion}/releasenotes"
+ !define HelpLink              "https://support.mozilla.org"
+diff --git a/browser/branding/official/configure.sh b/browser/branding/official/configure.sh
+index 1fbe981c9c..9a93d7b827 100644
+--- a/browser/branding/official/configure.sh
++++ b/browser/branding/official/configure.sh
+@@ -2,7 +2,7 @@
+ # License, v. 2.0. If a copy of the MPL was not distributed with this
+ # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ 
+-MOZ_APP_DISPLAYNAME=Firefox
++MOZ_APP_DISPLAYNAME=Floorp
+ 
+ if test "$MOZ_UPDATE_CHANNEL" = "beta"; then
+   # Official beta builds
+diff --git a/browser/components/BrowserContentHandler.jsm b/browser/components/BrowserContentHandler.jsm
+index 58edd37d95..7fb6aa09ce 100644
+--- a/browser/components/BrowserContentHandler.jsm
++++ b/browser/components/BrowserContentHandler.jsm
+@@ -879,7 +879,7 @@ nsBrowserContentHandler.prototype = {
+       var urlParam = cmdLine.getArgument(urlFlagIdx + 1);
+       if (
+         cmdLine.length != urlFlagIdx + 2 ||
+-        /firefoxurl(-[a-f0-9]+)?:/i.test(urlParam)
++        /floorpurl(-[a-f0-9]+)?:/i.test(urlParam)
+       ) {
+         throw Components.Exception("", Cr.NS_ERROR_ABORT);
+       }
+diff --git a/browser/components/BrowserGlue.jsm b/browser/components/BrowserGlue.jsm
+index 70334e638c..4f26bcbaa9 100644
+--- a/browser/components/BrowserGlue.jsm
++++ b/browser/components/BrowserGlue.jsm
+@@ -1640,12 +1640,12 @@ BrowserGlue.prototype = {
+       if (updateChannel) {
+         let uninstalledValue = WindowsRegistry.readRegKey(
+           Ci.nsIWindowsRegKey.ROOT_KEY_CURRENT_USER,
+-          "Software\\Mozilla\\Firefox",
++          "Software\\Ablaze\\Floorp",
+           `Uninstalled-${updateChannel}`
+         );
+         let removalSuccessful = WindowsRegistry.removeRegKey(
+           Ci.nsIWindowsRegKey.ROOT_KEY_CURRENT_USER,
+-          "Software\\Mozilla\\Firefox",
++          "Software\\Ablaze\\Floorp",
+           `Uninstalled-${updateChannel}`
+         );
+         if (removalSuccessful && uninstalledValue == "True") {
+diff --git a/browser/components/extensions/test/xpcshell/test_ext_pkcs11_management.js b/browser/components/extensions/test/xpcshell/test_ext_pkcs11_management.js
+index 9d6dae0d6b..16521a599a 100644
+--- a/browser/components/extensions/test/xpcshell/test_ext_pkcs11_management.js
++++ b/browser/components/extensions/test/xpcshell/test_ext_pkcs11_management.js
+@@ -82,7 +82,7 @@ async function setupManifests(modules) {
+       break;
+ 
+     case "win":
+-      const REGKEY = String.raw`Software\Mozilla\PKCS11Modules`;
++      const REGKEY = String.raw`Software\Ablaze\PKCS11Modules`;
+ 
+       let registry = new MockRegistry();
+       registerCleanupFunction(() => {
+diff --git a/browser/components/installerprefs/InstallerPrefs.jsm b/browser/components/installerprefs/InstallerPrefs.jsm
+index 6366ccf5df..9b2d42ea90 100644
+--- a/browser/components/installerprefs/InstallerPrefs.jsm
++++ b/browser/components/installerprefs/InstallerPrefs.jsm
+@@ -48,7 +48,7 @@ function InstallerPrefs(prefsList) {
+ 
+   // Each pref to be reflected will get a value created under this key, in HKCU.
+   // The path will look something like:
+-  // "Software\Mozilla\Firefox\Installer\71AE18FE3142402B\".
++  // "Software\Ablaze\Floorp\Installer\71AE18FE3142402B\".
+   XPCOMUtils.defineLazyGetter(this, "_registryKeyPath", function() {
+     const app = AppConstants.MOZ_APP_NAME;
+     const vendor = Services.appinfo.vendor || "Mozilla";
+diff --git a/browser/components/migration/MigrationUtils.jsm b/browser/components/migration/MigrationUtils.jsm
+index 69d0a36f28..6c40cad9bb 100644
+--- a/browser/components/migration/MigrationUtils.jsm
++++ b/browser/components/migration/MigrationUtils.jsm
+@@ -809,7 +809,7 @@ var MigrationUtils = Object.seal({
+         key = gPreviousDefaultBrowserKey;
+       } else {
+         // We didn't have a saved value, so check the registry.
+-        const kRegPath = "Software\\Mozilla\\Firefox";
++        const kRegPath = "Software\\Ablaze\\Floorp";
+         let oldDefault = WindowsRegistry.readRegKey(
+           Ci.nsIWindowsRegKey.ROOT_KEY_CURRENT_USER,
+           kRegPath,
+diff --git a/browser/components/preferences/main.js b/browser/components/preferences/main.js
+index f0864a5cff..b769da2323 100644
+--- a/browser/components/preferences/main.js
++++ b/browser/components/preferences/main.js
+@@ -702,7 +702,7 @@ var gMainPane = {
+           );
+           wrk.open(
+             wrk.ROOT_KEY_LOCAL_MACHINE,
+-            "SOFTWARE\\Mozilla\\MaintenanceService",
++            "SOFTWARE\\Ablaze\\MaintenanceService",
+             wrk.ACCESS_READ | wrk.WOW64_64
+           );
+           installed = wrk.readIntValue("Installed");
+diff --git a/browser/components/shell/ShellService.jsm b/browser/components/shell/ShellService.jsm
+index ee7bd4342e..5aea1aa2c3 100644
+--- a/browser/components/shell/ShellService.jsm
++++ b/browser/components/shell/ShellService.jsm
+@@ -71,12 +71,12 @@ let ShellServiceInternal = {
+     if (AppConstants.platform == "win") {
+       let optOutValue = WindowsRegistry.readRegKey(
+         Ci.nsIWindowsRegKey.ROOT_KEY_CURRENT_USER,
+-        "Software\\Mozilla\\Firefox",
++        "Software\\Ablaze\\Floorp",
+         "DefaultBrowserOptOut"
+       );
+       WindowsRegistry.removeRegKey(
+         Ci.nsIWindowsRegKey.ROOT_KEY_CURRENT_USER,
+-        "Software\\Mozilla\\Firefox",
++        "Software\\Ablaze\\Floorp",
+         "DefaultBrowserOptOut"
+       );
+       if (optOutValue == "True") {
+diff --git a/browser/components/shell/WindowsDefaultBrowser.cpp b/browser/components/shell/WindowsDefaultBrowser.cpp
+index 34e00be89f..12b0a1d144 100644
+--- a/browser/components/shell/WindowsDefaultBrowser.cpp
++++ b/browser/components/shell/WindowsDefaultBrowser.cpp
+@@ -31,7 +31,7 @@
+ #include <wchar.h>
+ #include <windows.h>
+ 
+-#define APP_REG_NAME_BASE L"Firefox-"
++#define APP_REG_NAME_BASE L"Floorp-"
+ 
+ static bool IsWindowsLogonConnected() {
+   WCHAR userName[UNLEN + 1];
+diff --git a/browser/components/shell/WindowsUserChoice.h b/browser/components/shell/WindowsUserChoice.h
+index d7e887b667..1bca408d7d 100644
+--- a/browser/components/shell/WindowsUserChoice.h
++++ b/browser/components/shell/WindowsUserChoice.h
+@@ -85,7 +85,7 @@ mozilla::UniquePtr<wchar_t[]> GenerateUserChoiceHash(const wchar_t* aExt,
+ /*
+  * Build a ProgID from a base and AUMI
+  *
+- * @param aProgIDBase   A base, such as FirefoxHTML or FirefoxURL
++ * @param aProgIDBase   A base, such as FloorpHTML or FloorpURL
+  * @param aAumi         The AUMI of the installation
+  *
+  * @return Formatted ProgID.
+diff --git a/browser/components/shell/nsWindowsShellService.cpp b/browser/components/shell/nsWindowsShellService.cpp
+index 8a776f655f..1728663178 100644
+--- a/browser/components/shell/nsWindowsShellService.cpp
++++ b/browser/components/shell/nsWindowsShellService.cpp
+@@ -307,9 +307,9 @@ nsWindowsShellService::CheckAllProgIDsExist(bool* aResult) {
+     return NS_OK;
+   }
+   *aResult =
+-      CheckProgIDExists(FormatProgID(L"FirefoxURL", aumid.get()).get()) &&
+-      CheckProgIDExists(FormatProgID(L"FirefoxHTML", aumid.get()).get()) &&
+-      CheckProgIDExists(FormatProgID(L"FirefoxPDF", aumid.get()).get());
++      CheckProgIDExists(FormatProgID(L"FloorpURL", aumid.get()).get()) &&
++      CheckProgIDExists(FormatProgID(L"FloorpHTML", aumid.get()).get()) &&
++      CheckProgIDExists(FormatProgID(L"FloorpPDF", aumid.get()).get());
+   return NS_OK;
+ }
+ 
+@@ -574,7 +574,7 @@ nsWindowsShellService::SetDesktopBackground(dom::Element* aElement,
+                               getter_AddRefs(file));
+   NS_ENSURE_SUCCESS(rv, rv);
+ 
+-  // eventually, the path is "%APPDATA%\Mozilla\Firefox\Desktop Background.bmp"
++  // eventually, the path is "%APPDATA%\Ablaze\Floorp\Desktop Background.bmp"
+   rv = file->Append(fileLeafName);
+   NS_ENSURE_SUCCESS(rv, rv);
+ 
+diff --git a/browser/installer/windows/app.tag b/browser/installer/windows/app.tag
+index 479d9f714a..51849f03ba 100644
+--- a/browser/installer/windows/app.tag
++++ b/browser/installer/windows/app.tag
+@@ -1,4 +1,4 @@
+ ;!@Install@!UTF-8!
+-Title="Mozilla Firefox"
++Title="Floorp"
+ RunProgram="setup.exe"
+ ;!@InstallEnd@!
+\ No newline at end of file
+diff --git a/browser/installer/windows/nsis/defines.nsi.in b/browser/installer/windows/nsis/defines.nsi.in
+index 0056bdbac2..7195c24eb3 100644
+--- a/browser/installer/windows/nsis/defines.nsi.in
++++ b/browser/installer/windows/nsis/defines.nsi.in
+@@ -21,18 +21,18 @@
+ !endif
+ 
+ # These defines should match application.ini settings
+-!define AppName               "Firefox"
++!define AppName               "Floorp"
+ !define AppVersion            "@APP_VERSION@"
+ !define GREVersion            @MOZILLA_VERSION@
+ !define AB_CD                 "@AB_CD@"
+ 
+ !define FileMainEXE           "@MOZ_APP_NAME@.exe"
+-!define MainWindowClass       "MozillaWindowClass"
+-!define DialogWindowClass     "MozillaDialogClass"
+-!define DDEApplication        "Firefox"
+-!define AppRegName            "Firefox"
++!define MainWindowClass       "FloorpWindowClass"
++!define DialogWindowClass     "FloorpDialogClass"
++!define DDEApplication        "Floorp"
++!define AppRegName            "Floorp"
+ 
+-!define BrandProductName      "Firefox"
++!define BrandProductName      "Floorp"
+ !ifndef DEV_EDITION
+ !define BrandShortName        "@MOZ_APP_DISPLAYNAME@"
+ !endif
+@@ -69,7 +69,7 @@
+ 
+ #ifdef MOZ_LAUNCHER_PROCESS
+ !define MOZ_LAUNCHER_PROCESS
+-!define MOZ_LAUNCHER_SUBKEY "Software\Mozilla\${AppName}\Launcher"
++!define MOZ_LAUNCHER_SUBKEY "Software\Ablaze\${AppName}\Launcher"
+ #endif
+ 
+ #ifdef RELEASE_OR_BETA
+diff --git a/browser/installer/windows/nsis/installer.nsi b/browser/installer/windows/nsis/installer.nsi
+index b32ba6306f..6dc2cbfc54 100755
+--- a/browser/installer/windows/nsis/installer.nsi
++++ b/browser/installer/windows/nsis/installer.nsi
+@@ -305,10 +305,10 @@ Section "-InstallStartCleanup"
+   ${EndIf}
+ 
+   ; setup the application model id registration value
+-  ${InitHashAppModelId} "$INSTDIR" "Software\Mozilla\${AppName}\TaskBarIDs"
++  ${InitHashAppModelId} "$INSTDIR" "Software\Ablaze\${AppName}\TaskBarIDs"
+ 
+   ; Remove the updates directory
+-  ${CleanUpdateDirectories} "Mozilla\Firefox" "Mozilla\updates"
++  ${CleanUpdateDirectories} "Ablaze\Floorp" "Ablaze\updates"
+ 
+   ${RemoveDeprecatedFiles}
+   ${RemovePrecompleteEntries} "false"
+@@ -412,25 +412,25 @@ Section "-Application" APP_IDX
+ 
+   ${LogHeader} "Adding Registry Entries"
+   SetShellVarContext current  ; Set SHCTX to HKCU
+-  ${RegCleanMain} "Software\Mozilla"
++  ${RegCleanMain} "Software\Ablaze"
+   ${RegCleanUninstall}
+   ${UpdateProtocolHandlers}
+ 
+   ClearErrors
+-  WriteRegStr HKLM "Software\Mozilla" "${BrandShortName}InstallerTest" "Write Test"
++  WriteRegStr HKLM "Software\Ablaze" "${BrandShortName}InstallerTest" "Write Test"
+   ${If} ${Errors}
+     StrCpy $TmpVal "HKCU" ; used primarily for logging
+   ${Else}
+     SetShellVarContext all  ; Set SHCTX to HKLM
+-    DeleteRegValue HKLM "Software\Mozilla" "${BrandShortName}InstallerTest"
++    DeleteRegValue HKLM "Software\Ablaze" "${BrandShortName}InstallerTest"
+     StrCpy $TmpVal "HKLM" ; used primarily for logging
+-    ${RegCleanMain} "Software\Mozilla"
++    ${RegCleanMain} "Software\Ablaze"
+     ${RegCleanUninstall}
+     ${UpdateProtocolHandlers}
+ 
+-    ReadRegStr $0 HKLM "Software\mozilla.org\Mozilla" "CurrentVersion"
++    ReadRegStr $0 HKLM "Software\Ablaze\Floorp" "CurrentVersion"
+     ${If} "$0" != "${GREVersion}"
+-      WriteRegStr HKLM "Software\mozilla.org\Mozilla" "CurrentVersion" "${GREVersion}"
++      WriteRegStr HKLM "Software\Ablaze\Floorp" "CurrentVersion" "${GREVersion}"
+     ${EndIf}
+   ${EndIf}
+ 
+@@ -453,19 +453,19 @@ Section "-Application" APP_IDX
+   ; it doesn't cause problems always add them.
+   ${SetUninstallKeys}
+ 
+-  ; On install always add the FirefoxHTML-, FirefoxPDF-, and FirefoxURL- keys.
+-  ; An empty string is used for the 5th param because FirefoxHTML- is not a
++  ; On install always add the FloorpHTML-, FloorpPDF-, and FloorpURL- keys.
++  ; An empty string is used for the 5th param because FloorpHTML- is not a
+   ; protocol handler.
+   ${GetLongPath} "$INSTDIR\${FileMainEXE}" $8
+   StrCpy $2 "$\"$8$\" -osint -url $\"%1$\""
+ 
+-  ; In Win8, the delegate execute handler picks up the value in FirefoxURL- and
+-  ; FirefoxHTML- to launch the desktop browser when it needs to.
+-  ${AddDisabledDDEHandlerValues} "FirefoxHTML-$AppUserModelID" "$2" "$8,${IDI_DOCUMENT_ZERO_BASED}" \
++  ; In Win8, the delegate execute handler picks up the value in FloorpURL- and
++  ; FloorpHTML- to launch the desktop browser when it needs to.
++  ${AddDisabledDDEHandlerValues} "FloorpHTML-$AppUserModelID" "$2" "$8,${IDI_DOCUMENT_ZERO_BASED}" \
+                                  "${AppRegName} HTML Document" ""
+-  ${AddDisabledDDEHandlerValues} "FirefoxPDF-$AppUserModelID" "$2" "$8,${IDI_DOCUMENT_PDF_ZERO_BASED}" \
++  ${AddDisabledDDEHandlerValues} "FloorpPDF-$AppUserModelID" "$2" "$8,${IDI_DOCUMENT_PDF_ZERO_BASED}" \
+                                  "${AppRegName} PDF Document" ""
+-  ${AddDisabledDDEHandlerValues} "FirefoxURL-$AppUserModelID" "$2" "$8,${IDI_DOCUMENT_ZERO_BASED}" \
++  ${AddDisabledDDEHandlerValues} "FloorpURL-$AppUserModelID" "$2" "$8,${IDI_DOCUMENT_ZERO_BASED}" \
+                                  "${AppRegName} URL" "true"
+ 
+   ; For pre win8, the following keys should only be set if we can write to HKLM.
+@@ -741,7 +741,7 @@ Section "-Application" APP_IDX
+   ${EndIf}
+   ; Remember whether we were told to skip registering the agent, so that updates
+   ; won't try to create a registration when they don't find an existing one.
+-  WriteRegDWORD HKCU "Software\Mozilla\${AppName}\Installer\$AppUserModelID" \
++  WriteRegDWORD HKCU "Software\Ablaze\${AppName}\Installer\$AppUserModelID" \
+                      "DidRegisterDefaultBrowserAgent" $RegisterDefaultAgent
+ !endif
+ SectionEnd
+@@ -794,7 +794,7 @@ Section "-InstallEndCleanup"
+       ; If we have something other than empty string now, write the value.
+       ${If} "$0" != ""
+         ClearErrors
+-        WriteRegStr HKCU "Software\Mozilla\Firefox" "OldDefaultBrowserCommand" "$0"
++        WriteRegStr HKCU "Software\Ablaze\Floorp" "OldDefaultBrowserCommand" "$0"
+       ${EndIf}
+ 
+       ${LogHeader} "Setting as the default browser"
+@@ -811,7 +811,7 @@ Section "-InstallEndCleanup"
+       StrCpy $SetAsDefault false
+       ${LogHeader} "Writing default-browser opt-out"
+       ClearErrors
+-      WriteRegStr HKCU "Software\Mozilla\Firefox" "DefaultBrowserOptOut" "True"
++      WriteRegStr HKCU "Software\Ablaze\Floorp" "DefaultBrowserOptOut" "True"
+       ${If} ${Errors}
+         ${LogMsg} "Error writing default-browser opt-out"
+       ${EndIf}
+@@ -1101,12 +1101,12 @@ Function SendPing
+   ${EndIf}
+ 
+   ClearErrors
+-  WriteRegStr HKLM "Software\Mozilla" "${BrandShortName}InstallerTest" \
++  WriteRegStr HKLM "Software\Ablaze" "${BrandShortName}InstallerTest" \
+                    "Write Test"
+   ${If} ${Errors}
+     nsJSON::Set /tree ping "Data" "admin_user" /value false
+   ${Else}
+-    DeleteRegValue HKLM "Software\Mozilla" "${BrandShortName}InstallerTest"
++    DeleteRegValue HKLM "Software\Ablaze" "${BrandShortName}InstallerTest"
+     nsJSON::Set /tree ping "Data" "admin_user" /value true
+   ${EndIf}
+ 
+@@ -1131,7 +1131,7 @@ Function SendPing
+     ${If} $1 == $INSTDIR
+       nsJSON::Set /tree ping "Data" "new_default" /value true
+     ${Else}
+-      StrCpy $0 "$0" "" -11 # 11 == length of "firefox.exe"
++      StrCpy $0 "$0" "" -10 # 10 == length of "floorp.exe"
+       ${If} "$0" == "${FileMainEXE}"
+         nsJSON::Set /tree ping "Data" "old_default" /value true
+       ${EndIf}
+@@ -1239,12 +1239,12 @@ Function WriteInstallationTelemetryData
+   ; Check for write access to HKLM, if successful then report this user
+   ; as an (elevated) admin.
+   ClearErrors
+-  WriteRegStr HKLM "Software\Mozilla" "${BrandShortName}InstallerTest" \
++  WriteRegStr HKLM "Software\Ablaze" "${BrandShortName}InstallerTest" \
+                    "Write Test"
+   ${If} ${Errors}
+     StrCpy $1 "false"
+   ${Else}
+-    DeleteRegValue HKLM "Software\Mozilla" "${BrandShortName}InstallerTest"
++    DeleteRegValue HKLM "Software\Ablaze" "${BrandShortName}InstallerTest"
+     StrCpy $1 "true"
+   ${EndIf}
+   ${JSONSet} "admin_user" /value $1
+@@ -1259,7 +1259,7 @@ Function WriteInstallationTelemetryData
+   ; Check for top-level profile directory
+   ; Note: This is the same check used to set $ExistingProfile in stub.nsi
+   ${GetLocalAppDataFolder} $0
+-  ${If} ${FileExists} "$0\Mozilla\Firefox"
++  ${If} ${FileExists} "$0\Ablaze\Floorp"
+     StrCpy $1 "true"
+   ${Else}
+     StrCpy $1 "false"
+@@ -1477,13 +1477,13 @@ Function preComponents
+ 
+   ; Only show the maintenance service page if we have write access to HKLM
+   ClearErrors
+-  WriteRegStr HKLM "Software\Mozilla" \
++  WriteRegStr HKLM "Software\Ablaze" \
+               "${BrandShortName}InstallerTest" "Write Test"
+   ${If} ${Errors}
+     ClearErrors
+     Abort
+   ${Else}
+-    DeleteRegValue HKLM "Software\Mozilla" "${BrandShortName}InstallerTest"
++    DeleteRegValue HKLM "Software\Ablaze" "${BrandShortName}InstallerTest"
+   ${EndIf}
+ 
+   StrCpy $PageName "Components"
+@@ -1662,9 +1662,9 @@ Function preSummary
+ 
+   ; Check if it is possible to write to HKLM
+   ClearErrors
+-  WriteRegStr HKLM "Software\Mozilla" "${BrandShortName}InstallerTest" "Write Test"
++  WriteRegStr HKLM "Software\Ablaze" "${BrandShortName}InstallerTest" "Write Test"
+   ${Unless} ${Errors}
+-    DeleteRegValue HKLM "Software\Mozilla" "${BrandShortName}InstallerTest"
++    DeleteRegValue HKLM "Software\Ablaze" "${BrandShortName}InstallerTest"
+     ; Check if Firefox is the http handler for this user.
+     SetShellVarContext current ; Set SHCTX to the current user
+     ${IsHandlerForInstallDir} "http" $R9
+@@ -1837,10 +1837,10 @@ Function .onInit
+ !endif
+ 
+   SetShellVarContext all
+-  ${GetFirstInstallPath} "Software\Mozilla\${BrandFullNameInternal}" $0
++  ${GetFirstInstallPath} "Software\Ablaze\${BrandFullNameInternal}" $0
+   ${If} "$0" == "false"
+     SetShellVarContext current
+-    ${GetFirstInstallPath} "Software\Mozilla\${BrandFullNameInternal}" $0
++    ${GetFirstInstallPath} "Software\Ablaze\${BrandFullNameInternal}" $0
+     ${If} "$0" == "false"
+       StrCpy $HadOldInstall false
+     ${Else}
+diff --git a/browser/installer/windows/nsis/maintenanceservice_installer.nsi b/browser/installer/windows/nsis/maintenanceservice_installer.nsi
+index ff87ef0839..0e2d9ae6eb 100644
+--- a/browser/installer/windows/nsis/maintenanceservice_installer.nsi
++++ b/browser/installer/windows/nsis/maintenanceservice_installer.nsi
+@@ -41,7 +41,7 @@ Var BrandFullName
+ ; And anyone that wants to run tests themselves should already have 
+ ; this installed.
+ !define FallbackKey \
+-  "SOFTWARE\Mozilla\MaintenanceService\3932ecacee736d366d6436db0f55bce4"
++  "SOFTWARE\Ablaze\MaintenanceService\3932ecacee736d366d6436db0f55bce4"
+ 
+ !define CompanyName "Mozilla Corporation"
+ !define BrandFullNameInternal ""
+@@ -66,7 +66,7 @@ Name "${MaintFullName}"
+ OutFile "maintenanceservice_installer.exe"
+ 
+ ; Get installation folder from registry if available
+-InstallDirRegKey HKLM "Software\Mozilla\MaintenanceService" ""
++InstallDirRegKey HKLM "Software\Ablaze\MaintenanceService" ""
+ 
+ SetOverwrite on
+ 
+@@ -209,9 +209,9 @@ Section "MaintenanceService"
+   ; want to install once on the first upgrade to maintenance service.
+   ; Also write out that we are currently installed, preferences will check
+   ; this value to determine if we should show the service update pref.
+-  WriteRegDWORD HKLM "Software\Mozilla\MaintenanceService" "Attempted" 1
+-  WriteRegDWORD HKLM "Software\Mozilla\MaintenanceService" "Installed" 1
+-  DeleteRegValue HKLM "Software\Mozilla\MaintenanceService" "FFPrefetchDisabled"
++  WriteRegDWORD HKLM "Software\Ablaze\MaintenanceService" "Attempted" 1
++  WriteRegDWORD HKLM "Software\Ablaze\MaintenanceService" "Installed" 1
++  DeleteRegValue HKLM "Software\Ablaze\MaintenanceService" "FFPrefetchDisabled"
+ 
+   ; Included here for debug purposes only.  
+   ; These keys are used to bypass the installation dir is a valid installation
+@@ -333,8 +333,8 @@ Section "Uninstall"
+     SetRegView 64
+   ${EndIf}
+   DeleteRegKey HKLM "${MaintUninstallKey}"
+-  DeleteRegValue HKLM "Software\Mozilla\MaintenanceService" "Installed"
+-  DeleteRegValue HKLM "Software\Mozilla\MaintenanceService" "FFPrefetchDisabled"
++  DeleteRegValue HKLM "Software\Ablaze\MaintenanceService" "Installed"
++  DeleteRegValue HKLM "Software\Ablaze\MaintenanceService" "FFPrefetchDisabled"
+   DeleteRegKey HKLM "${FallbackKey}\"
+   ${If} ${RunningX64}
+   ${OrIf} ${IsNativeARM64}
+diff --git a/browser/installer/windows/nsis/shared.nsh b/browser/installer/windows/nsis/shared.nsh
+index c2a32cc47e..3723c8fd02 100755
+--- a/browser/installer/windows/nsis/shared.nsh
++++ b/browser/installer/windows/nsis/shared.nsh
+@@ -6,25 +6,25 @@
+   ${CreateShortcutsLog}
+ 
+   ; Remove registry entries for non-existent apps and for apps that point to our
+-  ; install location in the Software\Mozilla key and uninstall registry entries
++  ; install location in the Software\Ablaze key and uninstall registry entries
+   ; that point to our install location for both HKCU and HKLM.
+   SetShellVarContext current  ; Set SHCTX to the current user (e.g. HKCU)
+-  ${RegCleanMain} "Software\Mozilla"
++  ${RegCleanMain} "Software\Ablaze"
+   ${RegCleanUninstall}
+   ${UpdateProtocolHandlers}
+ 
+   ; setup the application model id registration value
+-  ${InitHashAppModelId} "$INSTDIR" "Software\Mozilla\${AppName}\TaskBarIDs"
++  ${InitHashAppModelId} "$INSTDIR" "Software\Ablaze\${AppName}\TaskBarIDs"
+ 
+   ClearErrors
+-  WriteRegStr HKLM "Software\Mozilla" "${BrandShortName}InstallerTest" "Write Test"
++  WriteRegStr HKLM "Software\Ablaze" "${BrandShortName}InstallerTest" "Write Test"
+   ${If} ${Errors}
+     StrCpy $TmpVal "HKCU"
+   ${Else}
+     SetShellVarContext all    ; Set SHCTX to all users (e.g. HKLM)
+-    DeleteRegValue HKLM "Software\Mozilla" "${BrandShortName}InstallerTest"
++    DeleteRegValue HKLM "Software\Ablaze" "${BrandShortName}InstallerTest"
+     StrCpy $TmpVal "HKLM"
+-    ${RegCleanMain} "Software\Mozilla"
++    ${RegCleanMain} "Software\Ablaze"
+     ${RegCleanUninstall}
+     ${UpdateProtocolHandlers}
+     ${FixShellIconHandler} "HKLM"
+@@ -33,9 +33,9 @@
+     ; Add the Firewall entries after an update
+     Call AddFirewallEntries
+ 
+-    ReadRegStr $0 HKLM "Software\mozilla.org\Mozilla" "CurrentVersion"
++    ReadRegStr $0 HKLM "Software\Ablaze\Floorp" "CurrentVersion"
+     ${If} "$0" != "${GREVersion}"
+-      WriteRegStr HKLM "Software\mozilla.org\Mozilla" "CurrentVersion" "${GREVersion}"
++      WriteRegStr HKLM "Software\Ablaze\Floorp" "CurrentVersion" "${GREVersion}"
+     ${EndIf}
+   ${EndIf}
+ 
+@@ -92,10 +92,10 @@
+     ; If it already exists, just delete the appdata one.
+     ; It's possible this was for a different install, but it's impossible to
+     ; know for sure, so we may as well just get rid of it.
+-    Delete /REBOOTOK "$0\Mozilla\Firefox\postSigningData"
++    Delete /REBOOTOK "$0\Ablaze\Floorp\postSigningData"
+   ${Else}
+-    ${If} ${FileExists} "$0\Mozilla\Firefox\postSigningData"
+-      Rename "$0\Mozilla\Firefox\postSigningData" "$INSTDIR\postSigningData"
++    ${If} ${FileExists} "$0\Ablaze\Floorp\postSigningData"
++      Rename "$0\Ablaze\Floorp\postSigningData" "$INSTDIR\postSigningData"
+     ${EndIf}
+   ${EndIf}
+ 
+@@ -123,7 +123,7 @@
+     ${OrIf} ${IsNativeARM64}
+       SetRegView 64
+     ${EndIf}
+-    ReadRegDWORD $5 HKLM "Software\Mozilla\MaintenanceService" "Attempted"
++    ReadRegDWORD $5 HKLM "Software\Ablaze\MaintenanceService" "Attempted"
+     ClearErrors
+     ${If} ${RunningX64}
+     ${OrIf} ${IsNativeARM64}
+@@ -166,7 +166,7 @@
+ !ifdef MOZ_DEFAULT_BROWSER_AGENT
+ ${If} $TmpVal == "HKCU"
+   ClearErrors
+-  ReadRegDWORD $0 HKCU "Software\Mozilla\${AppName}\Installer\$AppUserModelID" \
++  ReadRegDWORD $0 HKCU "Software\Ablaze\${AppName}\Installer\$AppUserModelID" \
+                     "DidRegisterDefaultBrowserAgent"
+   ${If} $0 != 0
+   ${OrIf} ${Errors}
+@@ -466,35 +466,35 @@ ${RemoveDefaultBrowserAgentShortcut}
+   StrCpy $0 "SOFTWARE\Classes"
+   StrCpy $2 "$\"$8$\" -osint -url $\"%1$\""
+ 
+-  ; Associate the file handlers with FirefoxHTML, if they aren't already.
++  ; Associate the file handlers with FloorpHTML, if they aren't already.
+   ReadRegStr $6 SHCTX "$0\.htm" ""
+   ${WordFind} "$6" "-" "+1{" $6
+-  ${If} "$6" != "FirefoxHTML"
+-    WriteRegStr SHCTX "$0\.htm"   "" "FirefoxHTML$5"
++  ${If} "$6" != "FloorpHTML"
++    WriteRegStr SHCTX "$0\.htm"   "" "FloorpHTML$5"
+   ${EndIf}
+ 
+   ReadRegStr $6 SHCTX "$0\.html" ""
+   ${WordFind} "$6" "-" "+1{" $6
+-  ${If} "$6" != "FirefoxHTML"
+-    WriteRegStr SHCTX "$0\.html"  "" "FirefoxHTML$5"
++  ${If} "$6" != "FloorpHTML"
++    WriteRegStr SHCTX "$0\.html"  "" "FloorpHTML$5"
+   ${EndIf}
+ 
+   ReadRegStr $6 SHCTX "$0\.shtml" ""
+   ${WordFind} "$6" "-" "+1{" $6
+-  ${If} "$6" != "FirefoxHTML"
+-    WriteRegStr SHCTX "$0\.shtml" "" "FirefoxHTML$5"
++  ${If} "$6" != "FloorpHTML"
++    WriteRegStr SHCTX "$0\.shtml" "" "FloorpHTML$5"
+   ${EndIf}
+ 
+   ReadRegStr $6 SHCTX "$0\.xht" ""
+   ${WordFind} "$6" "-" "+1{" $6
+-  ${If} "$6" != "FirefoxHTML"
+-    WriteRegStr SHCTX "$0\.xht"   "" "FirefoxHTML$5"
++  ${If} "$6" != "FloorpHTML"
++    WriteRegStr SHCTX "$0\.xht"   "" "FloorpHTML$5"
+   ${EndIf}
+ 
+   ReadRegStr $6 SHCTX "$0\.xhtml" ""
+   ${WordFind} "$6" "-" "+1{" $6
+-  ${If} "$6" != "FirefoxHTML"
+-    WriteRegStr SHCTX "$0\.xhtml" "" "FirefoxHTML$5"
++  ${If} "$6" != "FloorpHTML"
++    WriteRegStr SHCTX "$0\.xhtml" "" "FloorpHTML$5"
+   ${EndIf}
+ 
+ 
+@@ -502,25 +502,25 @@ ${RemoveDefaultBrowserAgentShortcut}
+   ; https://searchfox.org/mozilla-central/source/browser/installer/windows/msix/AppxManifest.xml.in.
+   ; and `os.environment.launched_to_handle` and `os.environment.invoked_to_handle` telemetry in
+   ; https://searchfox.org/mozilla-central/source/browser/components/BrowserContentHandler.jsm.
+-  ${AddAssociationIfNoneExist} ".oga" "FirefoxHTML$5"
+-  ${AddAssociationIfNoneExist} ".ogg" "FirefoxHTML$5"
+-  ${AddAssociationIfNoneExist} ".ogv" "FirefoxHTML$5"
+-  ${AddAssociationIfNoneExist} ".webm" "FirefoxHTML$5"
+-  ${AddAssociationIfNoneExist} ".svg" "FirefoxHTML$5"
+-  ${AddAssociationIfNoneExist} ".webp"  "FirefoxHTML$5"
+-  ${AddAssociationIfNoneExist} ".avif" "FirefoxHTML$5"
+-
+-  ${AddAssociationIfNoneExist} ".pdf" "FirefoxPDF$5"
+-
+-  ; An empty string is used for the 5th param because FirefoxHTML- is not a
+-  ; protocol handler.  Ditto for FirefoxPDF-.
+-  ${AddDisabledDDEHandlerValues} "FirefoxHTML$5" "$2" "$8,${IDI_DOCUMENT_ZERO_BASED}" \
++  ${AddAssociationIfNoneExist} ".oga" "FloorpHTML$5"
++  ${AddAssociationIfNoneExist} ".ogg" "FloorpHTML$5"
++  ${AddAssociationIfNoneExist} ".ogv" "FloorpHTML$5"
++  ${AddAssociationIfNoneExist} ".webm" "FloorpHTML$5"
++  ${AddAssociationIfNoneExist} ".svg" "FloorpHTML$5"
++  ${AddAssociationIfNoneExist} ".webp"  "FloorpHTML$5"
++  ${AddAssociationIfNoneExist} ".avif" "FloorpHTML$5"
++
++  ${AddAssociationIfNoneExist} ".pdf" "FloorpPDF$5"
++
++  ; An empty string is used for the 5th param because FloorpHTML- is not a
++  ; protocol handler.  Ditto for FloorpPDF-.
++  ${AddDisabledDDEHandlerValues} "FloorpHTML$5" "$2" "$8,${IDI_DOCUMENT_ZERO_BASED}" \
+                                  "${AppRegName} HTML Document" ""
+ 
+-  ${AddDisabledDDEHandlerValues} "FirefoxPDF$5" "$2" "$8,${IDI_DOCUMENT_PDF_ZERO_BASED}" \
++  ${AddDisabledDDEHandlerValues} "FloorpPDF$5" "$2" "$8,${IDI_DOCUMENT_PDF_ZERO_BASED}" \
+                                  "${AppRegName} PDF Document" ""
+ 
+-  ${AddDisabledDDEHandlerValues} "FirefoxURL$5" "$2" "$8,${IDI_DOCUMENT_ZERO_BASED}" "${AppRegName} URL" \
++  ${AddDisabledDDEHandlerValues} "FloorpURL$5" "$2" "$8,${IDI_DOCUMENT_ZERO_BASED}" "${AppRegName} URL" \
+                                  "true"
+   ; An empty string is used for the 4th & 5th params because the following
+   ; protocol handlers already have a display name and the additional keys
+@@ -558,7 +558,7 @@ ${RemoveDefaultBrowserAgentShortcut}
+   ${GetLongPath} "$INSTDIR\${FileMainEXE}" $8
+   ${GetLongPath} "$INSTDIR\uninstall\helper.exe" $7
+ 
+-  ; If we already have keys at the old FIREFOX.EXE path, then just update those.
++  ; If we already have keys at the old FLOORP.EXE path, then just update those.
+   ; We have to be careful to update the existing keys in place so that we don't
+   ; create duplicate keys for the same installation, or cause Windows to think
+   ; something "suspicious" has happened and it should reset the default browser.
+@@ -597,16 +597,16 @@ ${RemoveDefaultBrowserAgentShortcut}
+   WriteRegStr ${RegKey} "$0\Capabilities" "ApplicationIcon" "$8,${IDI_APPICON_ZERO_BASED}"
+   WriteRegStr ${RegKey} "$0\Capabilities" "ApplicationName" "${BrandShortName}"
+ 
+-  WriteRegStr ${RegKey} "$0\Capabilities\FileAssociations" ".htm"   "FirefoxHTML$2"
+-  WriteRegStr ${RegKey} "$0\Capabilities\FileAssociations" ".html"  "FirefoxHTML$2"
+-  WriteRegStr ${RegKey} "$0\Capabilities\FileAssociations" ".shtml" "FirefoxHTML$2"
+-  WriteRegStr ${RegKey} "$0\Capabilities\FileAssociations" ".xht"   "FirefoxHTML$2"
+-  WriteRegStr ${RegKey} "$0\Capabilities\FileAssociations" ".xhtml" "FirefoxHTML$2"
+-  WriteRegStr ${RegKey} "$0\Capabilities\FileAssociations" ".svg"   "FirefoxHTML$2"
+-  WriteRegStr ${RegKey} "$0\Capabilities\FileAssociations" ".webp"  "FirefoxHTML$2"
+-  WriteRegStr ${RegKey} "$0\Capabilities\FileAssociations" ".avif"  "FirefoxHTML$2"
++  WriteRegStr ${RegKey} "$0\Capabilities\FileAssociations" ".htm"   "FloorpHTML$2"
++  WriteRegStr ${RegKey} "$0\Capabilities\FileAssociations" ".html"  "FloorpHTML$2"
++  WriteRegStr ${RegKey} "$0\Capabilities\FileAssociations" ".shtml" "FloorpHTML$2"
++  WriteRegStr ${RegKey} "$0\Capabilities\FileAssociations" ".xht"   "FloorpHTML$2"
++  WriteRegStr ${RegKey} "$0\Capabilities\FileAssociations" ".xhtml" "FloorpHTML$2"
++  WriteRegStr ${RegKey} "$0\Capabilities\FileAssociations" ".svg"   "FloorpHTML$2"
++  WriteRegStr ${RegKey} "$0\Capabilities\FileAssociations" ".webp"  "FloorpHTML$2"
++  WriteRegStr ${RegKey} "$0\Capabilities\FileAssociations" ".avif"  "FloorpHTML$2"
+ 
+-  WriteRegStr ${RegKey} "$0\Capabilities\FileAssociations" ".pdf"   "FirefoxPDF$2"
++  WriteRegStr ${RegKey} "$0\Capabilities\FileAssociations" ".pdf"   "FloorpPDF$2"
+ 
+   WriteRegStr ${RegKey} "$0\Capabilities\StartMenu" "StartMenuInternet" "$1"
+ 
+@@ -614,9 +614,9 @@ ${RemoveDefaultBrowserAgentShortcut}
+   ; entire key, we need to remove any existing registration.
+   DeleteRegValue ${RegKey} "$0\Capabilities\URLAssociations" "ftp"
+ 
+-  WriteRegStr ${RegKey} "$0\Capabilities\URLAssociations" "http"   "FirefoxURL$2"
+-  WriteRegStr ${RegKey} "$0\Capabilities\URLAssociations" "https"  "FirefoxURL$2"
+-  WriteRegStr ${RegKey} "$0\Capabilities\URLAssociations" "mailto" "FirefoxURL$2"
++  WriteRegStr ${RegKey} "$0\Capabilities\URLAssociations" "http"   "FloorpURL$2"
++  WriteRegStr ${RegKey} "$0\Capabilities\URLAssociations" "https"  "FloorpURL$2"
++  WriteRegStr ${RegKey} "$0\Capabilities\URLAssociations" "mailto" "FloorpURL$2"
+ 
+   WriteRegStr ${RegKey} "Software\RegisteredApplications" "$1" "$0\Capabilities"
+ 
+@@ -699,31 +699,31 @@ ${RemoveDefaultBrowserAgentShortcut}
+ 
+   ; Running Firefox 64 bit on Windows 64 bit
+   ClearErrors
+-  ReadRegDWORD $2 HKLM "Software\Mozilla\${AppName}\32to64DidMigrate" "$1"
++  ReadRegDWORD $2 HKLM "Software\Ablaze\${AppName}\32to64DidMigrate" "$1"
+   ; If there were no errors then the system was updated from Firefox 32 bit to
+   ; Firefox 64 bit and if the value is already 1 then the registry value has
+   ; already been updated in the HKLM registry.
+   ${IfNot} ${Errors}
+   ${AndIf} $2 != 1
+     ClearErrors
+-    WriteRegDWORD HKLM "Software\Mozilla\${AppName}\32to64DidMigrate" "$1" 1
++    WriteRegDWORD HKLM "Software\Ablaze\${AppName}\32to64DidMigrate" "$1" 1
+     ${If} ${Errors}
+       ; There was an error writing to HKLM so just write it to HKCU
+-      WriteRegDWORD HKCU "Software\Mozilla\${AppName}\32to64DidMigrate" "$1" 1
++      WriteRegDWORD HKCU "Software\Ablaze\${AppName}\32to64DidMigrate" "$1" 1
+     ${Else}
+       ; This will delete the value from HKCU if it exists
+-      DeleteRegValue HKCU "Software\Mozilla\${AppName}\32to64DidMigrate" "$1"
++      DeleteRegValue HKCU "Software\Ablaze\${AppName}\32to64DidMigrate" "$1"
+     ${EndIf}
+   ${EndIf}
+ 
+   ClearErrors
+-  ReadRegDWORD $2 HKCU "Software\Mozilla\${AppName}\32to64DidMigrate" "$1"
++  ReadRegDWORD $2 HKCU "Software\Ablaze\${AppName}\32to64DidMigrate" "$1"
+   ; If there were no errors then the system was updated from Firefox 32 bit to
+   ; Firefox 64 bit and if the value is already 1 then the registry value has
+   ; already been updated in the HKCU registry.
+   ${IfNot} ${Errors}
+   ${AndIf} $2 != 1
+-    WriteRegDWORD HKCU "Software\Mozilla\${AppName}\32to64DidMigrate" "$1" 1
++    WriteRegDWORD HKCU "Software\Ablaze\${AppName}\32to64DidMigrate" "$1" 1
+   ${EndIf}
+ 
+ !else
+@@ -733,14 +733,14 @@ ${RemoveDefaultBrowserAgentShortcut}
+   ${OrIf} ${IsNativeARM64}
+     ; Running Firefox 32 bit on a Windows 64 bit system
+     ClearErrors
+-    ReadRegDWORD $2 HKLM "Software\Mozilla\${AppName}\32to64DidMigrate" "$1"
++    ReadRegDWORD $2 HKLM "Software\Ablaze\${AppName}\32to64DidMigrate" "$1"
+     ; If there were errors the value doesn't exist yet.
+     ${If} ${Errors}
+       ClearErrors
+-      WriteRegDWORD HKLM "Software\Mozilla\${AppName}\32to64DidMigrate" "$1" 0
++      WriteRegDWORD HKLM "Software\Ablaze\${AppName}\32to64DidMigrate" "$1" 0
+       ; If there were errors write the value in HKCU.
+       ${If} ${Errors}
+-        WriteRegDWORD HKCU "Software\Mozilla\${AppName}\32to64DidMigrate" "$1" 0
++        WriteRegDWORD HKCU "Software\Ablaze\${AppName}\32to64DidMigrate" "$1" 0
+       ${EndIf}
+     ${EndIf}
+   ${EndIf}
+@@ -752,17 +752,17 @@ ${RemoveDefaultBrowserAgentShortcut}
+ !macroend
+ !define Set32to64DidMigrateReg "!insertmacro Set32to64DidMigrateReg"
+ 
+-; The IconHandler reference for FirefoxHTML can end up in an inconsistent state
++; The IconHandler reference for FloorpHTML can end up in an inconsistent state
+ ; due to changes not being detected by the IconHandler for side by side
+ ; installs (see bug 268512). The symptoms can be either an incorrect icon or no
+ ; icon being displayed for files associated with Firefox (does not use SHCTX).
+ !macro FixShellIconHandler RegKey
+-  ; Find the correct key to update, either FirefoxHTML or FirefoxHTML-[PathHash]
+-  StrCpy $3 "FirefoxHTML-$AppUserModelID"
++  ; Find the correct key to update, either FloorpHTML or FloorpHTML-[PathHash]
++  StrCpy $3 "FloorpHTML-$AppUserModelID"
+   ClearErrors
+   ReadRegStr $0 ${RegKey} "Software\Classes\$3\DefaultIcon" ""
+   ${If} ${Errors}
+-    StrCpy $3 "FirefoxHTML"
++    StrCpy $3 "FloorpHTML"
+   ${EndIf}
+ 
+   ClearErrors
+@@ -777,7 +777,7 @@ ${RemoveDefaultBrowserAgentShortcut}
+ !macroend
+ !define FixShellIconHandler "!insertmacro FixShellIconHandler"
+ 
+-; Add Software\Mozilla\ registry entries (uses SHCTX).
++; Add Software\Ablaze\ registry entries (uses SHCTX).
+ !macro SetAppKeys
+   ; Check if this is an ESR release and if so add registry values so it is
+   ; possible to determine that this is an ESR install (bug 726781).
+@@ -790,14 +790,14 @@ ${RemoveDefaultBrowserAgentShortcut}
+   ${EndIf}
+ 
+   ${GetLongPath} "$INSTDIR" $8
+-  StrCpy $0 "Software\Mozilla\${BrandFullNameInternal}\${AppVersion}$3 (${ARCH} ${AB_CD})\Main"
++  StrCpy $0 "Software\Ablaze\${BrandFullNameInternal}\${AppVersion}$3 (${ARCH} ${AB_CD})\Main"
+   ${WriteRegStr2} $TmpVal "$0" "Install Directory" "$8" 0
+   ${WriteRegStr2} $TmpVal "$0" "PathToExe" "$8\${FileMainEXE}" 0
+ 
+-  StrCpy $0 "Software\Mozilla\${BrandFullNameInternal}\${AppVersion}$3 (${ARCH} ${AB_CD})\Uninstall"
++  StrCpy $0 "Software\Ablaze\${BrandFullNameInternal}\${AppVersion}$3 (${ARCH} ${AB_CD})\Uninstall"
+   ${WriteRegStr2} $TmpVal "$0" "Description" "${BrandFullNameInternal} ${AppVersion}$3 (${ARCH} ${AB_CD})" 0
+ 
+-  StrCpy $0 "Software\Mozilla\${BrandFullNameInternal}\${AppVersion}$3 (${ARCH} ${AB_CD})"
++  StrCpy $0 "Software\Ablaze\${BrandFullNameInternal}\${AppVersion}$3 (${ARCH} ${AB_CD})"
+   ${WriteRegStr2} $TmpVal  "$0" "" "${AppVersion}$3 (${ARCH} ${AB_CD})" 0
+   ${If} "$3" == ""
+     DeleteRegValue SHCTX "$0" "ESR"
+@@ -805,14 +805,14 @@ ${RemoveDefaultBrowserAgentShortcut}
+     ${WriteRegDWORD2} $TmpVal "$0" "ESR" 1 0
+   ${EndIf}
+ 
+-  StrCpy $0 "Software\Mozilla\${BrandFullNameInternal} ${AppVersion}$3\bin"
++  StrCpy $0 "Software\Ablaze\${BrandFullNameInternal} ${AppVersion}$3\bin"
+   ${WriteRegStr2} $TmpVal "$0" "PathToExe" "$8\${FileMainEXE}" 0
+ 
+-  StrCpy $0 "Software\Mozilla\${BrandFullNameInternal} ${AppVersion}$3\extensions"
++  StrCpy $0 "Software\Ablaze\${BrandFullNameInternal} ${AppVersion}$3\extensions"
+   ${WriteRegStr2} $TmpVal "$0" "Components" "$8\components" 0
+   ${WriteRegStr2} $TmpVal "$0" "Plugins" "$8\plugins" 0
+ 
+-  StrCpy $0 "Software\Mozilla\${BrandFullNameInternal} ${AppVersion}$3"
++  StrCpy $0 "Software\Ablaze\${BrandFullNameInternal} ${AppVersion}$3"
+   ${WriteRegStr2} $TmpVal "$0" "GeckoVer" "${GREVersion}" 0
+   ${If} "$3" == ""
+     DeleteRegValue SHCTX "$0" "ESR"
+@@ -820,7 +820,7 @@ ${RemoveDefaultBrowserAgentShortcut}
+     ${WriteRegDWORD2} $TmpVal "$0" "ESR" 1 0
+   ${EndIf}
+ 
+-  StrCpy $0 "Software\Mozilla\${BrandFullNameInternal}$3"
++  StrCpy $0 "Software\Ablaze\${BrandFullNameInternal}$3"
+   ${WriteRegStr2} $TmpVal "$0" "" "${GREVersion}" 0
+   ${WriteRegStr2} $TmpVal "$0" "CurrentVersion" "${AppVersion}$3 (${ARCH} ${AB_CD})" 0
+ !macroend
+@@ -872,7 +872,7 @@ ${RemoveDefaultBrowserAgentShortcut}
+     ${WriteRegStr2} $1 "$0" "DisplayVersion" "${AppVersion}" 0
+     ${WriteRegStr2} $1 "$0" "HelpLink" "${HelpLink}" 0
+     ${WriteRegStr2} $1 "$0" "InstallLocation" "$8" 0
+-    ${WriteRegStr2} $1 "$0" "Publisher" "Mozilla" 0
++    ${WriteRegStr2} $1 "$0" "Publisher" "Ablaze" 0
+     ${WriteRegStr2} $1 "$0" "UninstallString" "$\"$8\uninstall\helper.exe$\"" 0
+     DeleteRegValue SHCTX "$0" "URLInfoAbout"
+ ; Don't add URLUpdateInfo which is the release notes url except for the release
+@@ -906,7 +906,7 @@ ${RemoveDefaultBrowserAgentShortcut}
+ ; HKCU Software\Classes keys when associating handlers. The fix uses the merged
+ ; view in HKCR to check for existance of an existing association. This macro
+ ; cleans affected installations by removing the HKLM and HKCU value if it is set
+-; to FirefoxHTML when there is a value for PersistentHandler or by removing the
++; to FloorpHTML when there is a value for PersistentHandler or by removing the
+ ; HKCU value when the HKLM value has a value other than an empty string.
+ !macro FixBadFileAssociation FILE_TYPE
+   ; Only delete the default value in case the key has values for OpenWithList,
+@@ -917,16 +917,16 @@ ${RemoveDefaultBrowserAgentShortcut}
+   ${WordFind} "$1" "-" "+1{" $1
+   ReadRegStr $2 HKCR "${FILE_TYPE}\PersistentHandler" ""
+   ${If} "$2" != ""
+-    ; Since there is a persistent handler remove FirefoxHTML as the default
+-    ; value from both HKCU and HKLM if it set to FirefoxHTML.
+-    ${If} "$0" == "FirefoxHTML"
++    ; Since there is a persistent handler remove FloorpHTML as the default
++    ; value from both HKCU and HKLM if it set to FloorpHTML.
++    ${If} "$0" == "FloorpHTML"
+       DeleteRegValue HKCU "Software\Classes\${FILE_TYPE}" ""
+     ${EndIf}
+-    ${If} "$1" == "FirefoxHTML"
++    ${If} "$1" == "FloorpHTML"
+       DeleteRegValue HKLM "Software\Classes\${FILE_TYPE}" ""
+     ${EndIf}
+-  ${ElseIf} "$0" == "FirefoxHTML"
+-    ; Since HKCU is set to FirefoxHTML remove FirefoxHTML as the default value
++  ${ElseIf} "$0" == "FloorpHTML"
++    ; Since HKCU is set to FloorpHTML remove FloorpHTML as the default value
+     ; from HKCU if HKLM is set to a value other than an empty string.
+     ${If} "$1" != ""
+       DeleteRegValue HKCU "Software\Classes\${FILE_TYPE}" ""
+@@ -982,36 +982,36 @@ ${RemoveDefaultBrowserAgentShortcut}
+   ; Only set the file and protocol handlers if the existing one under HKCR is
+   ; for this install location.
+ 
+-  ${IsHandlerForInstallDir} "FirefoxHTML-$AppUserModelID" $R9
++  ${IsHandlerForInstallDir} "FloorpHTML-$AppUserModelID" $R9
+   ${If} "$R9" == "true"
+-    ; An empty string is used for the 5th param because FirefoxHTML is not a
++    ; An empty string is used for the 5th param because FloorpHTML is not a
+     ; protocol handler.
+-    ${AddDisabledDDEHandlerValues} "FirefoxHTML-$AppUserModelID" "$2" "$8,${IDI_DOCUMENT_ZERO_BASED}" \
++    ${AddDisabledDDEHandlerValues} "FloorpHTML-$AppUserModelID" "$2" "$8,${IDI_DOCUMENT_ZERO_BASED}" \
+                                    "${AppRegName} HTML Document" ""
+   ${Else}
+-    ${IsHandlerForInstallDir} "FirefoxHTML" $R9
++    ${IsHandlerForInstallDir} "FloorpHTML" $R9
+     ${If} "$R9" == "true"
+-      ${AddDisabledDDEHandlerValues} "FirefoxHTML" "$2" "$8,${IDI_DOCUMENT_ZERO_BASED}" \
++      ${AddDisabledDDEHandlerValues} "FloorpHTML" "$2" "$8,${IDI_DOCUMENT_ZERO_BASED}" \
+                                      "${AppRegName} HTML Document" ""
+     ${EndIf}
+   ${EndIf}
+ 
+-  ; FirefoxPDF-* was added after FirefoxHTML and FirefoxURL, so we've never
+-  ; supported bare "FirefoxPDF".  But we won't have it from the installer, so we
++  ; FloorpPDF-* was added after FloorpHTML and FloorpURL, so we've never
++  ; supported bare "FloorpPDF".  But we won't have it from the installer, so we
+   ; add/update it unconditionally.  `PostUpdate` is gated on `uninstall.log`
+   ; being present, so the invocation here will only happen for installed
+   ; directories, not unpackaged directories.
+-  ${AddDisabledDDEHandlerValues} "FirefoxPDF-$AppUserModelID" "$2" "$8,${IDI_DOCUMENT_PDF_ZERO_BASED}" \
++  ${AddDisabledDDEHandlerValues} "FloorpPDF-$AppUserModelID" "$2" "$8,${IDI_DOCUMENT_PDF_ZERO_BASED}" \
+                                  "${AppRegName} PDF Document" ""
+ 
+-  ${IsHandlerForInstallDir} "FirefoxURL-$AppUserModelID" $R9
++  ${IsHandlerForInstallDir} "FloorpURL-$AppUserModelID" $R9
+   ${If} "$R9" == "true"
+-    ${AddDisabledDDEHandlerValues} "FirefoxURL-$AppUserModelID" "$2" "$8,${IDI_DOCUMENT_ZERO_BASED}" \
++    ${AddDisabledDDEHandlerValues} "FloorpURL-$AppUserModelID" "$2" "$8,${IDI_DOCUMENT_ZERO_BASED}" \
+                                    "${AppRegName} URL" "true"
+   ${Else}
+-    ${IsHandlerForInstallDir} "FirefoxURL" $R9
++    ${IsHandlerForInstallDir} "FloorpURL" $R9
+     ${If} "$R9" == "true"
+-      ${AddDisabledDDEHandlerValues} "FirefoxURL" "$2" "$8,${IDI_DOCUMENT_ZERO_BASED}" \
++      ${AddDisabledDDEHandlerValues} "FloorpURL" "$2" "$8,${IDI_DOCUMENT_ZERO_BASED}" \
+                                      "${AppRegName} URL" "true"
+     ${EndIf}
+   ${EndIf}
+@@ -1070,7 +1070,7 @@ ${RemoveDefaultBrowserAgentShortcut}
+     ; Setting the Attempted value will ensure that a new Maintenance Service
+     ; install will never be attempted again after this from updates.  The value
+     ; is used only to see if updates should attempt new service installs.
+-    WriteRegDWORD HKLM "Software\Mozilla\MaintenanceService" "Attempted" 1
++    WriteRegDWORD HKLM "Software\Ablaze\MaintenanceService" "Attempted" 1
+ 
+     ; These values associate the allowed certificates for the current
+     ; installation.
+@@ -1111,8 +1111,8 @@ ${RemoveDefaultBrowserAgentShortcut}
+   ${RegCleanAppHandler} "chrome"
+ 
+   ; Remove protocol handler registry keys added by the MS shim
+-  DeleteRegKey HKLM "Software\Classes\Firefox.URL"
+-  DeleteRegKey HKCU "Software\Classes\Firefox.URL"
++  DeleteRegKey HKLM "Software\Classes\Floorp.URL"
++  DeleteRegKey HKCU "Software\Classes\Floorp.URL"
+ !macroend
+ !define RemoveDeprecatedKeys "!insertmacro RemoveDeprecatedKeys"
+ 
+@@ -1257,7 +1257,7 @@ ${RemoveDefaultBrowserAgentShortcut}
+       ClearErrors
+       WriteIniStr "$0" "TASKBAR" "Migrated" "true"
+       WriteRegDWORD HKCU \
+-        "Software\Mozilla\${AppName}\Installer\$AppUserModelID" \
++        "Software\Ablaze\${AppName}\Installer\$AppUserModelID" \
+         "WasPinnedToTaskbar" 1
+       ${If} ${AtLeastWin7}
+         ; If we didn't run the stub installer, AddTaskbarSC will be empty.
+@@ -1282,7 +1282,7 @@ ${RemoveDefaultBrowserAgentShortcut}
+         ${EndIf}
+       ${EndIf}
+     ${ElseIf} ${AtLeastWin10}
+-      ${GetInstallerRegistryPref} "Software\Mozilla\${AppName}" \
++      ${GetInstallerRegistryPref} "Software\Ablaze\${AppName}" \
+         "installer.taskbarpin.win10.enabled" $2
+       ${If} $2 == "true"
+         ; On Windows 10, we may have previously tried to make a taskbar pin
+@@ -1292,11 +1292,11 @@ ${RemoveDefaultBrowserAgentShortcut}
+         ; registry value, so that we don't continue to do this repeatedly.
+         ClearErrors
+         ReadRegDWORD $2 HKCU \
+-            "Software\Mozilla\${AppName}\Installer\$AppUserModelID" \
++            "Software\Ablaze\${AppName}\Installer\$AppUserModelID" \
+             "WasPinnedToTaskbar"
+         ${If} ${Errors}
+           WriteRegDWORD HKCU \
+-            "Software\Mozilla\${AppName}\Installer\$AppUserModelID" \
++            "Software\Ablaze\${AppName}\Installer\$AppUserModelID" \
+             "WasPinnedToTaskbar" 1
+           ${If} $AddTaskbarSC != "0"
+             ${PinToTaskBar}
+@@ -1570,7 +1570,7 @@ Function SetAsDefaultAppUserHKCU
+   StrCpy $0 $0 -2
+   ${If} $0 != $8
+     ${If} $AppUserModelID == ""
+-      ${InitHashAppModelId} "$INSTDIR" "Software\Mozilla\${AppName}\TaskBarIDs"
++      ${InitHashAppModelId} "$INSTDIR" "Software\Ablaze\${AppName}\TaskBarIDs"
+     ${EndIf}
+     StrCpy $R9 "${AppRegName}-$AppUserModelID"
+   ${EndIf}
+diff --git a/browser/installer/windows/nsis/stub.nsi b/browser/installer/windows/nsis/stub.nsi
+index db216a4f8a..3ad55e17e3 100644
+--- a/browser/installer/windows/nsis/stub.nsi
++++ b/browser/installer/windows/nsis/stub.nsi
+@@ -328,19 +328,19 @@ Function .onInit
+   ; path for this install, even if it's not the same architecture.
+   SetRegView 32
+   SetShellVarContext all ; Set SHCTX to HKLM
+-  ${GetSingleInstallPath} "Software\Mozilla\${BrandFullNameInternal}" $R9
++  ${GetSingleInstallPath} "Software\Ablaze\${BrandFullNameInternal}" $R9
+ 
+   ${If} "$R9" == "false"
+     ${If} ${IsNativeAMD64}
+     ${OrIf} ${IsNativeARM64}
+       SetRegView 64
+-      ${GetSingleInstallPath} "Software\Mozilla\${BrandFullNameInternal}" $R9
++      ${GetSingleInstallPath} "Software\Ablaze\${BrandFullNameInternal}" $R9
+     ${EndIf}
+   ${EndIf}
+ 
+   ${If} "$R9" == "false"
+     SetShellVarContext current ; Set SHCTX to HKCU
+-    ${GetSingleInstallPath} "Software\Mozilla\${BrandFullNameInternal}" $R9
++    ${GetSingleInstallPath} "Software\Ablaze\${BrandFullNameInternal}" $R9
+   ${EndIf}
+ 
+   StrCpy $PreviousInstallDir ""
+@@ -353,7 +353,7 @@ Function .onInit
+   StrCpy $InitialInstallDir "$INSTDIR"
+ 
+   ClearErrors
+-  WriteRegStr HKLM "Software\Mozilla" "${BrandShortName}InstallerTest" \
++  WriteRegStr HKLM "Software\Ablaze" "${BrandShortName}InstallerTest" \
+                    "Write Test"
+ 
+   ; Only display set as default when there is write access to HKLM and on Win7
+@@ -362,7 +362,7 @@ Function .onInit
+   ${OrIf} ${AtLeastWin8}
+     StrCpy $CanSetAsDefault "false"
+   ${Else}
+-    DeleteRegValue HKLM "Software\Mozilla" "${BrandShortName}InstallerTest"
++    DeleteRegValue HKLM "Software\Ablaze" "${BrandShortName}InstallerTest"
+     StrCpy $CanSetAsDefault "true"
+   ${EndIf}
+   StrCpy $CheckboxSetAsDefault "0"
+@@ -472,7 +472,7 @@ Function .onInit
+     Quit
+   ${EndIf}
+ 
+-  ${InitHashAppModelId} "$INSTDIR" "Software\Mozilla\${AppName}\TaskBarIDs"
++  ${InitHashAppModelId} "$INSTDIR" "Software\Ablaze\${AppName}\TaskBarIDs"
+ 
+   File /oname=$PLUGINSDIR\stub_common.css "stub_common.css"
+   File /oname=$PLUGINSDIR\stub_common.js "stub_common.js"
+@@ -685,7 +685,7 @@ Function createInstall
+   ${EndIf}
+ 
+   ${GetLocalAppDataFolder} $0
+-  ${If} ${FileExists} "$0\Mozilla\Firefox"
++  ${If} ${FileExists} "$0\Mozilla\Floorp"
+     StrCpy $ExistingProfile "1"
+   ${Else}
+     StrCpy $ExistingProfile "0"
+@@ -1071,12 +1071,12 @@ Function SendPing
+     ${EndIf}
+ 
+     ClearErrors
+-    WriteRegStr HKLM "Software\Mozilla" "${BrandShortName}InstallerTest" \
++    WriteRegStr HKLM "Software\Ablaze" "${BrandShortName}InstallerTest" \
+                      "Write Test"
+     ${If} ${Errors}
+       StrCpy $R8 "0"
+     ${Else}
+-      DeleteRegValue HKLM "Software\Mozilla" "${BrandShortName}InstallerTest"
++      DeleteRegValue HKLM "Software\Ablaze" "${BrandShortName}InstallerTest"
+       StrCpy $R8 "1"
+     ${EndIf}
+ 
+@@ -1094,7 +1094,7 @@ Function SendPing
+       ${If} $R3 == $INSTDIR
+         StrCpy $R2 "1" ; This Firefox install is set as default.
+       ${Else}
+-        StrCpy $R2 "$R2" "" -11 # length of firefox.exe
++        StrCpy $R2 "$R2" "" -10 # length of floorp.exe
+         ${If} "$R2" == "${FileMainEXE}"
+           StrCpy $R2 "2" ; Another Firefox install is set as default.
+         ${Else}
+@@ -1115,7 +1115,7 @@ Function SendPing
+         ${If} $R3 == $INSTDIR
+           StrCpy $R2 "1" ; This Firefox install is set as default.
+         ${Else}
+-          StrCpy $R2 "$R2" "" -11 # length of firefox.exe
++          StrCpy $R2 "$R2" "" -10 # length of floorp.exe
+           ${If} "$R2" == "${FileMainEXE}"
+             StrCpy $R2 "2" ; Another Firefox install is set as default.
+           ${Else}
+@@ -1497,21 +1497,21 @@ Function ShouldPromptForProfileCleanup
+     ${Do}
+       ClearErrors
+       ; Check if the section exists by reading a value that must be present.
+-      ReadINIStr $1 "$APPDATA\Mozilla\Firefox\profiles.ini" "Profile$0" "Path"
++      ReadINIStr $1 "$APPDATA\Ablaze\Floorp\profiles.ini" "Profile$0" "Path"
+       ${If} ${Errors}
+         ; We've run out of profile sections.
+         ${Break}
+       ${EndIf}
+ 
+       ClearErrors
+-      ReadINIStr $1 "$APPDATA\Mozilla\Firefox\profiles.ini" "Profile$0" "Default"
++      ReadINIStr $1 "$APPDATA\Ablaze\Floorp\profiles.ini" "Profile$0" "Default"
+       ${IfNot} ${Errors}
+       ${AndIf} $1 == "1"
+         ; We've found the default profile
+-        ReadINIStr $1 "$APPDATA\Mozilla\Firefox\profiles.ini" "Profile$0" "Path"
+-        ReadINIStr $2 "$APPDATA\Mozilla\Firefox\profiles.ini" "Profile$0" "IsRelative"
++        ReadINIStr $1 "$APPDATA\Ablaze\Floorp\profiles.ini" "Profile$0" "Path"
++        ReadINIStr $2 "$APPDATA\Ablaze\Floorp\profiles.ini" "Profile$0" "IsRelative"
+         ${If} $2 == "1"
+-          StrCpy $R0 "$APPDATA\Mozilla\Firefox\$1"
++          StrCpy $R0 "$APPDATA\Ablaze\Floorp\$1"
+         ${Else}
+           StrCpy $R0 "$1"
+         ${EndIf}
+@@ -1531,7 +1531,7 @@ Function ShouldPromptForProfileCleanup
+ 
+   ; We have at least one profile present. If we don't have any installations,
+   ; then we need to show the re-install prompt. We'll say there's an
+-  ; installation present if HKCR\FirefoxURL* exists and points to a real path.
++  ; installation present if HKCR\FloorpURL* exists and points to a real path.
+   StrCpy $0 0
+   StrCpy $R9 ""
+   ${Do}
+@@ -1542,7 +1542,7 @@ Function ShouldPromptForProfileCleanup
+       ${Break}
+     ${EndIf}
+     ${WordFind} "$1" "-" "+1{" $2
+-    ${If} $2 == "FirefoxURL"
++    ${If} $2 == "FloorpURL"
+       ClearErrors
+       ReadRegStr $2 HKCR "$1\DefaultIcon" ""
+       ${IfNot} ${Errors}
+@@ -1562,10 +1562,10 @@ Function ShouldPromptForProfileCleanup
+ 
+   ; Okay, there's at least one install, let's see if it's for this channel.
+   SetShellVarContext all
+-  ${GetSingleInstallPath} "Software\Mozilla\${BrandFullNameInternal}" $0
++  ${GetSingleInstallPath} "Software\Ablaze\${BrandFullNameInternal}" $0
+   ${If} $0 == "false"
+     SetShellVarContext current
+-    ${GetSingleInstallPath} "Software\Mozilla\${BrandFullNameInternal}" $0
++    ${GetSingleInstallPath} "Software\Ablaze\${BrandFullNameInternal}" $0
+     ${If} $0 == "false"
+       ; Existing installs are not for this channel. Don't show any prompt.
+       GoTo end
+diff --git a/browser/installer/windows/nsis/uninstaller.nsi b/browser/installer/windows/nsis/uninstaller.nsi
+index 1af08007fc..febc810cdb 100755
+--- a/browser/installer/windows/nsis/uninstaller.nsi
++++ b/browser/installer/windows/nsis/uninstaller.nsi
+@@ -242,7 +242,7 @@ Function un.UninstallServiceIfNotUsed
+   ; Figure out the number of subkeys
+   StrCpy $0 0
+   ${Do}
+-    EnumRegKey $1 HKLM "Software\Mozilla\MaintenanceService" $0
++    EnumRegKey $1 HKLM "Software\Ablaze\MaintenanceService" $0
+     ${If} "$1" == ""
+       ${ExitDo}
+     ${EndIf}
+@@ -429,8 +429,8 @@ Section "Uninstall"
+   ${EndIf}
+ 
+   SetShellVarContext current  ; Set SHCTX to HKCU
+-  ${un.RegCleanMain} "Software\Mozilla"
+-  ${un.RegCleanPrefs} "Software\Mozilla\${AppName}"
++  ${un.RegCleanMain} "Software\Ablaze"
++  ${un.RegCleanPrefs} "Software\Ablaze\${AppName}"
+   ${un.RegCleanUninstall}
+   ${un.DeleteShortcuts}
+ 
+@@ -452,52 +452,52 @@ Section "Uninstall"
+   ${EndIf}
+ 
+   ; Remove the updates directory
+-  ${un.CleanUpdateDirectories} "Mozilla\Firefox" "Mozilla\updates"
++  ${un.CleanUpdateDirectories} "Ablaze\Floorp" "Ablaze\updates"
+ 
+   ; Remove any app model id's stored in the registry for this install path
+-  DeleteRegValue HKCU "Software\Mozilla\${AppName}\TaskBarIDs" "$INSTDIR"
+-  DeleteRegValue HKLM "Software\Mozilla\${AppName}\TaskBarIDs" "$INSTDIR"
++  DeleteRegValue HKCU "Software\Ablaze\${AppName}\TaskBarIDs" "$INSTDIR"
++  DeleteRegValue HKLM "Software\Ablaze\${AppName}\TaskBarIDs" "$INSTDIR"
+ 
+   ClearErrors
+-  WriteRegStr HKLM "Software\Mozilla" "${BrandShortName}InstallerTest" "Write Test"
++  WriteRegStr HKLM "Software\Ablaze" "${BrandShortName}InstallerTest" "Write Test"
+   ${If} ${Errors}
+     StrCpy $TmpVal "HKCU" ; used primarily for logging
+   ${Else}
+     SetShellVarContext all  ; Set SHCTX to HKLM
+-    DeleteRegValue HKLM "Software\Mozilla" "${BrandShortName}InstallerTest"
++    DeleteRegValue HKLM "Software\Ablaze" "${BrandShortName}InstallerTest"
+     StrCpy $TmpVal "HKLM" ; used primarily for logging
+-    ${un.RegCleanMain} "Software\Mozilla"
++    ${un.RegCleanMain} "Software\Ablaze"
+     ${un.RegCleanUninstall}
+     ${un.DeleteShortcuts}
+     ${un.SetAppLSPCategories}
+   ${EndIf}
+ 
+-  ${un.RegCleanAppHandler} "FirefoxHTML-$AppUserModelID"
+-  ${un.RegCleanAppHandler} "FirefoxPDF-$AppUserModelID"
+-  ${un.RegCleanAppHandler} "FirefoxURL-$AppUserModelID"
++  ${un.RegCleanAppHandler} "FloorpHTML-$AppUserModelID"
++  ${un.RegCleanAppHandler} "FloorpPDF-$AppUserModelID"
++  ${un.RegCleanAppHandler} "FloorpURL-$AppUserModelID"
+   ${un.RegCleanProtocolHandler} "http"
+   ${un.RegCleanProtocolHandler} "https"
+   ${un.RegCleanProtocolHandler} "mailto"
+-  ${un.RegCleanFileHandler}  ".htm"   "FirefoxHTML-$AppUserModelID"
+-  ${un.RegCleanFileHandler}  ".html"  "FirefoxHTML-$AppUserModelID"
+-  ${un.RegCleanFileHandler}  ".shtml" "FirefoxHTML-$AppUserModelID"
+-  ${un.RegCleanFileHandler}  ".xht"   "FirefoxHTML-$AppUserModelID"
+-  ${un.RegCleanFileHandler}  ".xhtml" "FirefoxHTML-$AppUserModelID"
+-  ${un.RegCleanFileHandler}  ".oga"   "FirefoxHTML-$AppUserModelID"
+-  ${un.RegCleanFileHandler}  ".ogg"   "FirefoxHTML-$AppUserModelID"
+-  ${un.RegCleanFileHandler}  ".ogv"   "FirefoxHTML-$AppUserModelID"
+-  ${un.RegCleanFileHandler}  ".webm"  "FirefoxHTML-$AppUserModelID"
+-  ${un.RegCleanFileHandler}  ".svg"   "FirefoxHTML-$AppUserModelID"
+-  ${un.RegCleanFileHandler}  ".webp"  "FirefoxHTML-$AppUserModelID"
+-  ${un.RegCleanFileHandler}  ".avif"  "FirefoxHTML-$AppUserModelID"
+-
+-  ${un.RegCleanFileHandler}  ".pdf"   "FirefoxPDF-$AppUserModelID"
++  ${un.RegCleanFileHandler}  ".htm"   "FloorpHTML-$AppUserModelID"
++  ${un.RegCleanFileHandler}  ".html"  "FloorpHTML-$AppUserModelID"
++  ${un.RegCleanFileHandler}  ".shtml" "FloorpHTML-$AppUserModelID"
++  ${un.RegCleanFileHandler}  ".xht"   "FloorpHTML-$AppUserModelID"
++  ${un.RegCleanFileHandler}  ".xhtml" "FloorpHTML-$AppUserModelID"
++  ${un.RegCleanFileHandler}  ".oga"   "FloorpHTML-$AppUserModelID"
++  ${un.RegCleanFileHandler}  ".ogg"   "FloorpHTML-$AppUserModelID"
++  ${un.RegCleanFileHandler}  ".ogv"   "FloorpHTML-$AppUserModelID"
++  ${un.RegCleanFileHandler}  ".webm"  "FloorpHTML-$AppUserModelID"
++  ${un.RegCleanFileHandler}  ".svg"   "FloorpHTML-$AppUserModelID"
++  ${un.RegCleanFileHandler}  ".webp"  "FloorpHTML-$AppUserModelID"
++  ${un.RegCleanFileHandler}  ".avif"  "FloorpHTML-$AppUserModelID"
++
++  ${un.RegCleanFileHandler}  ".pdf"   "FloorpPDF-$AppUserModelID"
+ 
+   SetShellVarContext all  ; Set SHCTX to HKLM
+-  ${un.GetSecondInstallPath} "Software\Mozilla" $R9
++  ${un.GetSecondInstallPath} "Software\Ablaze" $R9
+   ${If} $R9 == "false"
+     SetShellVarContext current  ; Set SHCTX to HKCU
+-    ${un.GetSecondInstallPath} "Software\Mozilla" $R9
++    ${un.GetSecondInstallPath} "Software\Ablaze" $R9
+   ${EndIf}
+ 
+   DeleteRegKey HKLM "Software\Clients\StartMenuInternet\${AppRegName}-$AppUserModelID"
+@@ -508,22 +508,22 @@ Section "Uninstall"
+ 
+   ; Remove old protocol handler and StartMenuInternet keys without install path
+   ; hashes, but only if they're for this installation.  We've never supported
+-  ; bare FirefoxPDF.
+-  ReadRegStr $0 HKLM "Software\Classes\FirefoxHTML\DefaultIcon" ""
++  ; bare FloorpPDF.
++  ReadRegStr $0 HKLM "Software\Classes\FloorpHTML\DefaultIcon" ""
+   StrCpy $0 $0 -2
+   ${If} $0 == "$INSTDIR\${FileMainEXE}"
+-    DeleteRegKey HKLM "Software\Classes\FirefoxHTML"
+-    DeleteRegKey HKLM "Software\Classes\FirefoxURL"
++    DeleteRegKey HKLM "Software\Classes\FloorpHTML"
++    DeleteRegKey HKLM "Software\Classes\FloorpURL"
+     ${StrFilter} "${FileMainEXE}" "+" "" "" $R9
+     DeleteRegKey HKLM "Software\Clients\StartMenuInternet\$R9"
+     DeleteRegValue HKLM "Software\RegisteredApplications" "$R9"
+     DeleteRegValue HKLM "Software\RegisteredApplications" "${AppRegName}"
+   ${EndIf}
+-  ReadRegStr $0 HKCU "Software\Classes\FirefoxHTML\DefaultIcon" ""
++  ReadRegStr $0 HKCU "Software\Classes\FloorpHTML\DefaultIcon" ""
+   StrCpy $0 $0 -2
+   ${If} $0 == "$INSTDIR\${FileMainEXE}"
+-    DeleteRegKey HKCU "Software\Classes\FirefoxHTML"
+-    DeleteRegKey HKCU "Software\Classes\FirefoxURL"
++    DeleteRegKey HKCU "Software\Classes\FloorpHTML"
++    DeleteRegKey HKCU "Software\Classes\FloorpURL"
+     ${StrFilter} "${FileMainEXE}" "+" "" "" $R9
+     DeleteRegKey HKCU "Software\Clients\StartMenuInternet\$R9"
+     DeleteRegValue HKCU "Software\RegisteredApplications" "$R9"
+@@ -540,7 +540,7 @@ Section "Uninstall"
+     StrCpy $0 "Software\Microsoft\MediaPlayer\ShimInclusionList\plugin-container.exe"
+     DeleteRegKey HKLM "$0"
+     DeleteRegKey HKCU "$0"
+-    StrCpy $0 "Software\Classes\MIME\Database\Content Type\application/x-xpinstall;app=firefox"
++    StrCpy $0 "Software\Classes\MIME\Database\Content Type\application/x-xpinstall;app=floorp"
+     DeleteRegKey HKLM "$0"
+     DeleteRegKey HKCU "$0"
+   ${Else}
+@@ -676,7 +676,7 @@ Section "Uninstall"
+   ; subsequently deleted after checking. If the value is found during startup
+   ; the browser will offer to Reset Firefox. We use the UpdateChannel to match
+   ; uninstalls of Firefox-release with reinstalls of Firefox-release, for example.
+-  WriteRegStr HKCU "Software\Mozilla\Firefox" "Uninstalled-${UpdateChannel}" "True"
++  WriteRegStr HKCU "Software\Ablaze\Floorp" "Uninstalled-${UpdateChannel}" "True"
+ 
+ !ifdef MOZ_MAINTENANCE_SERVICE
+   ; Get the path the allowed cert is at and remove it
+@@ -1004,7 +1004,7 @@ Function un.onInit
+   ${un.UninstallUnOnInitCommon}
+ 
+   ; setup the application model id registration value
+-  ${un.InitHashAppModelId} "$INSTDIR" "Software\Mozilla\${AppName}\TaskBarIDs"
++  ${un.InitHashAppModelId} "$INSTDIR" "Software\Ablaze\${AppName}\TaskBarIDs"
+ 
+   ; Find a default profile for this install.
+   SetShellVarContext current
+diff --git a/browser/installer/windows/stub.tag b/browser/installer/windows/stub.tag
+index f32bef36e8..be21d04971 100644
+--- a/browser/installer/windows/stub.tag
++++ b/browser/installer/windows/stub.tag
+@@ -1,4 +1,4 @@
+ ;!@Install@!UTF-8!
+-Title="Mozilla Firefox"
++Title="Floorp"
+ RunProgram="setup-stub.exe"
+ ;!@InstallEnd@!
+\ No newline at end of file
+diff --git a/dom/media/gmp/GMPChild.cpp b/dom/media/gmp/GMPChild.cpp
+index f219a105f1..d99c6af755 100644
+--- a/dom/media/gmp/GMPChild.cpp
++++ b/dom/media/gmp/GMPChild.cpp
+@@ -345,13 +345,13 @@ static bool IsFileLeafEqualToASCII(const nsCOMPtr<nsIFile>& aFile,
+ #endif
+ 
+ #if defined(XP_WIN)
+-#  define FIREFOX_FILE u"firefox.exe"_ns
++#  define FIREFOX_FILE u"floorp.exe"_ns
+ #  define XUL_LIB_FILE u"xul.dll"_ns
+ #elif defined(XP_MACOSX)
+-#  define FIREFOX_FILE u"firefox"_ns
++#  define FIREFOX_FILE u"floorp"_ns
+ #  define XUL_LIB_FILE u"XUL"_ns
+ #else
+-#  define FIREFOX_FILE u"firefox"_ns
++#  define FIREFOX_FILE u"floorp"_ns
+ #  define XUL_LIB_FILE u"libxul.so"_ns
+ #endif
+ 
+diff --git a/layout/base/PresShell.cpp b/layout/base/PresShell.cpp
+index fa41edbf0f..17f7cd931b 100644
+--- a/layout/base/PresShell.cpp
++++ b/layout/base/PresShell.cpp
+@@ -10319,12 +10319,12 @@ bool PresShell::VerifyIncrementalReflow() {
+   if (!ok) {
+     nsString stra;
+     static int num = 0;
+-    stra.AppendLiteral("C:\\mozilla\\mozilla\\debug\\filea");
++    stra.AppendLiteral("C:\\Ablaze\\mozilla\\debug\\filea");
+     stra.AppendInt(num);
+     stra.AppendLiteral(".png");
+     gfxUtils::WriteAsPNG(presShell, stra);
+     nsString strb;
+-    strb.AppendLiteral("C:\\mozilla\\mozilla\\debug\\fileb");
++    strb.AppendLiteral("C:\\Ablaze\\mozilla\\debug\\fileb");
+     strb.AppendInt(num);
+     strb.AppendLiteral(".png");
+     gfxUtils::WriteAsPNG(presShell, strb);
+diff --git a/modules/libpref/init/all.js b/modules/libpref/init/all.js
+index db545cd135..6d8076d44a 100644
+--- a/modules/libpref/init/all.js
++++ b/modules/libpref/init/all.js
+@@ -2680,7 +2680,7 @@ pref("font.size.monospace.x-math", 13);
+   pref("gfx.font_rendering.cleartype_params.force_gdi_classic_max_size", 15);
+ 
+   // Locate plugins by the directories specified in the Windows registry for PLIDs
+-  // Which is currently HKLM\Software\MozillaPlugins\xxxPLIDxxx\Path
++  // Which is currently HKLM\Software\AblazePlugins\xxxPLIDxxx\Path
+   pref("plugin.scan.plid.all", true);
+ 
+   // Switch the keyboard layout per window
+diff --git a/services/fxaccounts/tests/xpcshell/test_web_channel.js b/services/fxaccounts/tests/xpcshell/test_web_channel.js
+index 47f77a5317..18dfbbfcb8 100644
+--- a/services/fxaccounts/tests/xpcshell/test_web_channel.js
++++ b/services/fxaccounts/tests/xpcshell/test_web_channel.js
+@@ -155,7 +155,7 @@ add_test(function test_error_message_remove_profile_path() {
+     windows: {
+       err: new Error(
+         "Win error 183 during operation rename on file C:\\Users\\Some Computer\\AppData\\Roaming\\" +
+-          "Mozilla\\Firefox\\Profiles\\dbzjmzxa.default\\signedInUser.json (Cannot create a file)"
++          "Mozilla\\Ablaze\\Profiles\\dbzjmzxa.default\\signedInUser.json (Cannot create a file)"
+       ),
+       expected:
+         "Error: Win error 183 during operation rename on file C:[REDACTED]signedInUser.json (Cannot create a file)",
+@@ -170,7 +170,7 @@ add_test(function test_error_message_remove_profile_path() {
+     },
+     netpath: {
+       err: new Error(
+-        "Win error 32 during operation rename on file \\\\SVC.LOC\\HOMEDIRS$\\USERNAME\\Mozilla\\" +
++        "Win error 32 during operation rename on file \\\\SVC.LOC\\HOMEDIRS$\\USERNAME\\Ablaze\\" +
+           "Firefox\\Profiles\\dbzjmzxa.default-release-7\\signedInUser.json (No space left on device)"
+       ),
+       expected:
+@@ -179,7 +179,7 @@ add_test(function test_error_message_remove_profile_path() {
+     mount: {
+       err: new Error(
+         "Win error 649 during operation rename on file C:\\SnapVolumes\\MountPoints\\" +
+-          "{9e399ec5-0000-0000-0000-100000000000}\\SVROOT\\Users\\username\\AppData\\Roaming\\Mozilla\\Firefox\\" +
++          "{9e399ec5-0000-0000-0000-100000000000}\\SVROOT\\Users\\username\\AppData\\Roaming\\Ablaze\\Floorp\\" +
+           "Profiles\\dbzjmzxa.default-release\\signedInUser.json (The create operation failed)"
+       ),
+       expected:
+diff --git a/testing/mozbase/mozcrash/mozcrash/mozcrash.py b/testing/mozbase/mozcrash/mozcrash/mozcrash.py
+index 18d2742a02..33471cac36 100644
+--- a/testing/mozbase/mozcrash/mozcrash/mozcrash.py
++++ b/testing/mozbase/mozcrash/mozcrash/mozcrash.py
+@@ -806,14 +806,14 @@ def cleanup_pending_crash_reports():
+     """
+     if mozinfo.isWin:
+         location = os.path.expanduser(
+-            "~\\AppData\\Roaming\\Mozilla\\Firefox\\Crash Reports"
++            "~\\AppData\\Roaming\\Ablaze\\Floorp\\Crash Reports"
+         )
+     elif mozinfo.isMac:
+         location = os.path.expanduser(
+-            "~/Library/Application Support/firefox/Crash Reports"
++            "~/Library/Application Support/floorp/Crash Reports"
+         )
+     else:
+-        location = os.path.expanduser("~/.mozilla/firefox/Crash Reports")
++        location = os.path.expanduser("~/.ablaze/floorp/Crash Reports")
+     logger = get_logger()
+     if os.path.exists(location):
+         try:
+diff --git a/testing/mozharness/configs/raptor/windows_config.py b/testing/mozharness/configs/raptor/windows_config.py
+index 1667e3ea3c..552a294b83 100644
+--- a/testing/mozharness/configs/raptor/windows_config.py
++++ b/testing/mozharness/configs/raptor/windows_config.py
+@@ -53,7 +53,7 @@ config = {
+     },
+     "env": {
+         # python3 requires C runtime, found in firefox installation; see bug 1361732
+-        "PATH": "%(PATH)s;c:\\slave\\test\\build\\application\\firefox;"
++        "PATH": "%(PATH)s;c:\\slave\\test\\build\\application\\floorp;"
+     },
+     "run_cmd_checks_enabled": True,
+     "preflight_run_cmd_suites": [
+diff --git a/testing/mozharness/configs/raptor/windows_vm_config.py b/testing/mozharness/configs/raptor/windows_vm_config.py
+index b68697feed..b421295e4a 100644
+--- a/testing/mozharness/configs/raptor/windows_vm_config.py
++++ b/testing/mozharness/configs/raptor/windows_vm_config.py
+@@ -49,6 +49,6 @@ config = {
+     },
+     "env": {
+         # python3 requires C runtime, found in firefox installation; see bug 1361732
+-        "PATH": "%(PATH)s;c:\\slave\\test\\build\\application\\firefox;"
++        "PATH": "%(PATH)s;c:\\slave\\test\\build\\application\\floorp;"
+     },
+ }
+diff --git a/testing/talos/talos/mtio-allowlist.json b/testing/talos/talos/mtio-allowlist.json
+index 2b2d96f68a..ed38c225be 100644
+--- a/testing/talos/talos/mtio-allowlist.json
++++ b/testing/talos/talos/mtio-allowlist.json
+@@ -22,15 +22,15 @@
+  "{appdata}\\local\\microsoft\\windows\\caches\\cversions.1.db": {},
+  "{appdata}\\local\\microsoft\\windows\\caches\\{uuid-db}": {},
+  "{appdata}\\local\\temp": {},
+- "{appdata}\\locallow\\mozilla": {},
+- "{appdata}\\locallow\\mozilla\\{temp}": {},
++ "{appdata}\\locallow\\ablaze": {},
++ "{appdata}\\locallow\\ablaze\\{temp}": {},
+  "{appdata}\\roaming": {},
+  "{appdata}\\roaming\\microsoft": {},
+  "{appdata}\\roaming\\microsoft\\desktop.ini": {},
+  "{appdata}\\roaming\\microsoft\\windows": {},
+- "{appdata}\\roaming\\mozilla": {},
+- "{appdata}\\roaming\\mozilla\\extensions\\{uuid}": {},
+- "{appdata}\\roaming\\mozilla\\plugins": {},
++ "{appdata}\\roaming\\ablaze": {},
++ "{appdata}\\roaming\\ablaze\\extensions\\{uuid}": {},
++ "{appdata}\\roaming\\ablaze\\plugins": {},
+  "{appdata}\\roaming\\temp": {},
+  "{desktop}\\desktop.ini": {},
+  "{fonts}\\arial.ttf": {},
+diff --git a/testing/talos/talos/xtalos/xperf_allowlist.json b/testing/talos/talos/xtalos/xperf_allowlist.json
+index 0eda6e8954..a88f9e60e9 100644
+--- a/testing/talos/talos/xtalos/xperf_allowlist.json
++++ b/testing/talos/talos/xtalos/xperf_allowlist.json
+@@ -290,7 +290,7 @@
+     "minbytes": 16384,
+     "maxbytes": 16384
+   },
+-  "{firefox}\\firefox.exe": {
++  "{firefox}\\floorp.exe": {
+     "mincount": 2,
+     "maxcount": 2,
+     "minbytes": 8192,
+diff --git a/toolkit/components/aboutmemory/tests/memory-reports-diff1.json b/toolkit/components/aboutmemory/tests/memory-reports-diff1.json
+index 0a7e55c323..ceee2bee65 100644
+--- a/toolkit/components/aboutmemory/tests/memory-reports-diff1.json
++++ b/toolkit/components/aboutmemory/tests/memory-reports-diff1.json
+@@ -27,7 +27,7 @@
+     {"process": "P2 (pid 22)", "path": "p5/worker(foo.com, 0x1234)/p5", "kind": 2, "units": 0, "amount": 33, "description": "Desc."},
+     {"process": "P2 (pid 22)", "path": "explicit/window-objects/top(bar.com, id=123)/...", "kind": 0, "units": 0, "amount": 33, "description": "Desc."},
+     {"process": "P2 (pid 22)", "path": "p6/z-moz-nullprincipal:{85e250f3-57ae-46c4-a11e-4176dd39d9c5}/p6", "kind": 2, "units": 0, "amount": 33, "description": "Desc."},
+-    {"process": "P2 (pid 22)", "path": "p7/js-main-runtime-compartments/system/jar:file:\\\\\\temp_xyz\\firefox\\omni.ja!/p7", "kind": 2, "units": 0, "amount": 33, "description": "Desc."},
++    {"process": "P2 (pid 22)", "path": "p7/js-main-runtime-compartments/system/jar:file:\\\\\\temp_xyz\\floorp\\omni.ja!/p7", "kind": 2, "units": 0, "amount": 33, "description": "Desc."},
+     {"process": "P2 (pid 22)", "path": "explicit/js-non-window/runtime/script-sources/source(scripts=1011, <non-notable files>)/misc", "kind": 2, "units": 0, "amount": 33, "description": "Desc."},
+ 
+     {"process": "P3", "path": "p3", "kind": 2, "units": 0, "amount": 55, "description": "Desc."},
+diff --git a/toolkit/components/aboutmemory/tests/memory-reports-diff2.json b/toolkit/components/aboutmemory/tests/memory-reports-diff2.json
+index df9899c709..79d04bb066 100644
+--- a/toolkit/components/aboutmemory/tests/memory-reports-diff2.json
++++ b/toolkit/components/aboutmemory/tests/memory-reports-diff2.json
+@@ -28,7 +28,7 @@
+     {"process": "P2 (pid 22)", "path": "p5/worker(foo.com, 0x5678)/p5", "kind": 2, "units": 0, "amount": 44, "description": "Desc."},
+     {"process": "P2 (pid 22)", "path": "explicit/window-objects/top(bar.com, id=456)/...", "kind": 0, "units": 0, "amount": 44, "description": "Desc."},
+     {"process": "P2 (pid 22)", "path": "p6/z-moz-nullprincipal:{161effaa-c1f7-4010-a08e-e7c9aea01aed}/p6", "kind": 2, "units": 0, "amount": 44, "description": "Desc."},
+-    {"process": "P2 (pid 22)", "path": "p7/js-main-runtime-compartments/system/jar:file:\\\\\\temp_abc\\firefox\\omni.ja!/p7", "kind": 2, "units": 0, "amount": 44, "description": "Desc."},
++    {"process": "P2 (pid 22)", "path": "p7/js-main-runtime-compartments/system/jar:file:\\\\\\temp_abc\\floorp\\omni.ja!/p7", "kind": 2, "units": 0, "amount": 44, "description": "Desc."},
+     {"process": "P2 (pid 22)", "path": "explicit/js-non-window/runtime/script-sources/source(scripts=1, <non-notable files>)/misc", "kind": 2, "units": 0, "amount": 33, "description": "Desc."},
+ 
+     {"process": "P4", "path": "p4", "kind": 2, "units": 0, "amount": 66, "description": "Desc."},
+diff --git a/toolkit/components/enterprisepolicies/tests/browser/browser_policies_gpo.js b/toolkit/components/enterprisepolicies/tests/browser/browser_policies_gpo.js
+index 693c951486..4deb098bd8 100644
+--- a/toolkit/components/enterprisepolicies/tests/browser/browser_policies_gpo.js
++++ b/toolkit/components/enterprisepolicies/tests/browser/browser_policies_gpo.js
+@@ -6,7 +6,7 @@
+ add_task(async function setup_preferences() {
+   await SpecialPowers.pushPrefEnv({
+     set: [
+-      ["browser.policies.alternateGPO", "SOFTWARE\\Mozilla\\PolicyTesting"],
++      ["browser.policies.alternateGPO", "SOFTWARE\\Ablaze\\PolicyTesting"],
+     ],
+   });
+ });
+@@ -29,7 +29,7 @@ add_task(async function test_gpo_policies() {
+     Ci.nsIWindowsRegKey
+   );
+   let regLocation =
+-    "SOFTWARE\\Mozilla\\PolicyTesting\\Mozilla\\" + Services.appinfo.name;
++    "SOFTWARE\\Ablaze\\PolicyTesting\\Ablaze\\" + Services.appinfo.name;
+   wrk.create(wrk.ROOT_KEY_CURRENT_USER, regLocation, wrk.ACCESS_WRITE);
+   wrk.writeIntValue("gpo_policy", 1);
+   wrk.close();
+@@ -60,9 +60,9 @@ add_task(async function test_gpo_policies() {
+ 
+   delete Policies.gpo_policy;
+ 
+-  wrk.open(wrk.ROOT_KEY_CURRENT_USER, "SOFTWARE\\Mozilla", wrk.ACCESS_WRITE);
+-  wrk.removeChild("PolicyTesting\\Mozilla\\" + Services.appinfo.name);
+-  wrk.removeChild("PolicyTesting\\Mozilla");
++  wrk.open(wrk.ROOT_KEY_CURRENT_USER, "SOFTWARE\\Ablaze", wrk.ACCESS_WRITE);
++  wrk.removeChild("PolicyTesting\\Ablaze\\" + Services.appinfo.name);
++  wrk.removeChild("PolicyTesting\\Ablaze");
+   wrk.removeChild("PolicyTesting");
+   wrk.close();
+ });
+@@ -99,7 +99,7 @@ add_task(async function test_gpo_json_policies() {
+     Ci.nsIWindowsRegKey
+   );
+   let regLocation =
+-    "SOFTWARE\\Mozilla\\PolicyTesting\\Mozilla\\" + Services.appinfo.name;
++    "SOFTWARE\\Ablaze\\PolicyTesting\\Ablaze\\" + Services.appinfo.name;
+   wrk.create(wrk.ROOT_KEY_CURRENT_USER, regLocation, wrk.ACCESS_WRITE);
+   wrk.writeIntValue("gpo_policy", 1);
+   wrk.writeIntValue("coexist_policy", 0);
+@@ -146,9 +146,9 @@ add_task(async function test_gpo_json_policies() {
+   delete Policies.json_policy;
+   delete Policies.coexist_policy;
+ 
+-  wrk.open(wrk.ROOT_KEY_CURRENT_USER, "SOFTWARE\\Mozilla", wrk.ACCESS_WRITE);
+-  wrk.removeChild("PolicyTesting\\Mozilla\\" + Services.appinfo.name);
+-  wrk.removeChild("PolicyTesting\\Mozilla");
++  wrk.open(wrk.ROOT_KEY_CURRENT_USER, "SOFTWARE\\Ablaze", wrk.ACCESS_WRITE);
++  wrk.removeChild("PolicyTesting\\Ablaze\\" + Services.appinfo.name);
++  wrk.removeChild("PolicyTesting\\Ablaze");
+   wrk.removeChild("PolicyTesting");
+   wrk.close();
+ });
+@@ -171,7 +171,7 @@ add_task(async function test_gpo_broken_json_policies() {
+     Ci.nsIWindowsRegKey
+   );
+   let regLocation =
+-    "SOFTWARE\\Mozilla\\PolicyTesting\\Mozilla\\" + Services.appinfo.name;
++    "SOFTWARE\\Ablaze\\PolicyTesting\\Ablaze\\" + Services.appinfo.name;
+   wrk.create(wrk.ROOT_KEY_CURRENT_USER, regLocation, wrk.ACCESS_WRITE);
+   wrk.writeIntValue("gpo_policy", 1);
+   wrk.close();
+@@ -198,9 +198,9 @@ add_task(async function test_gpo_broken_json_policies() {
+ 
+   delete Policies.gpo_policy;
+ 
+-  wrk.open(wrk.ROOT_KEY_CURRENT_USER, "SOFTWARE\\Mozilla", wrk.ACCESS_WRITE);
+-  wrk.removeChild("PolicyTesting\\Mozilla\\" + Services.appinfo.name);
+-  wrk.removeChild("PolicyTesting\\Mozilla");
++  wrk.open(wrk.ROOT_KEY_CURRENT_USER, "SOFTWARE\\Ablaze", wrk.ACCESS_WRITE);
++  wrk.removeChild("PolicyTesting\\Ablaze\\" + Services.appinfo.name);
++  wrk.removeChild("PolicyTesting\\Ablaze");
+   wrk.removeChild("PolicyTesting");
+   wrk.close();
+ });
+diff --git a/toolkit/components/extensions/test/xpcshell/head_native_messaging.js b/toolkit/components/extensions/test/xpcshell/head_native_messaging.js
+index c5a12f5654..cb46e43ceb 100644
+--- a/toolkit/components/extensions/test/xpcshell/head_native_messaging.js
++++ b/toolkit/components/extensions/test/xpcshell/head_native_messaging.js
+@@ -105,7 +105,7 @@ async function setupHosts(scripts) {
+       break;
+ 
+     case "win":
+-      const REGKEY = String.raw`Software\Mozilla\NativeMessagingHosts`;
++      const REGKEY = String.raw`Software\Ablaze\NativeMessagingHosts`;
+ 
+       let registry = new MockRegistry();
+       registerCleanupFunction(() => {
+diff --git a/toolkit/components/extensions/test/xpcshell/test_ext_storage_managed.js b/toolkit/components/extensions/test/xpcshell/test_ext_storage_managed.js
+index e1eaaf3327..ab0eeb3fdb 100644
+--- a/toolkit/components/extensions/test/xpcshell/test_ext_storage_managed.js
++++ b/toolkit/components/extensions/test/xpcshell/test_ext_storage_managed.js
+@@ -51,7 +51,7 @@ add_task(async function setup() {
+     registry = new MockRegistry();
+     registry.setValue(
+       Ci.nsIWindowsRegKey.ROOT_KEY_CURRENT_USER,
+-      `Software\\\Mozilla\\\ManagedStorage\\${MANIFEST.name}`,
++      `Software\\\Ablaze\\\ManagedStorage\\${MANIFEST.name}`,
+       "",
+       path
+     );
+diff --git a/toolkit/components/extensions/test/xpcshell/test_native_manifests.js b/toolkit/components/extensions/test/xpcshell/test_native_manifests.js
+index 7cd0035909..9466cbfa1e 100644
+--- a/toolkit/components/extensions/test/xpcshell/test_native_manifests.js
++++ b/toolkit/components/extensions/test/xpcshell/test_native_manifests.js
+@@ -40,7 +40,7 @@ if (AppConstants.platform == "win") {
+   );
+ }
+ 
+-const REGPATH = "Software\\Mozilla\\NativeMessagingHosts";
++const REGPATH = "Software\\Ablaze\\NativeMessagingHosts";
+ 
+ const BASE_SCHEMA = "chrome://extensions/content/schemas/manifest.json";
+ 
+diff --git a/toolkit/components/maintenanceservice/bootstrapinstaller/maintenanceservice_installer.nsi b/toolkit/components/maintenanceservice/bootstrapinstaller/maintenanceservice_installer.nsi
+index 685458db0e..7aa0aa925a 100644
+--- a/toolkit/components/maintenanceservice/bootstrapinstaller/maintenanceservice_installer.nsi
++++ b/toolkit/components/maintenanceservice/bootstrapinstaller/maintenanceservice_installer.nsi
+@@ -41,7 +41,7 @@ Var BrandFullName
+ ; And anyone that wants to run tests themselves should already have 
+ ; this installed.
+ !define FallbackKey \
+-  "SOFTWARE\Mozilla\MaintenanceService\3932ecacee736d366d6436db0f55bce4"
++  "SOFTWARE\Ablaze\MaintenanceService\3932ecacee736d366d6436db0f55bce4"
+ 
+ !define CompanyName "Mozilla Corporation"
+ !define BrandFullNameInternal ""
+@@ -66,7 +66,7 @@ Name "${MaintFullName}"
+ OutFile "maintenanceservice_installer.exe"
+ 
+ ; Get installation folder from registry if available
+-InstallDirRegKey HKLM "Software\Mozilla\MaintenanceService" ""
++InstallDirRegKey HKLM "Software\Ablaze\MaintenanceService" ""
+ 
+ SetOverwrite on
+ 
+@@ -197,9 +197,9 @@ Section "MaintenanceService"
+   ${OrIf} ${IsNativeARM64}
+     SetRegView 64
+   ${EndIf}
+-  WriteRegDWORD HKLM "Software\Mozilla\MaintenanceService" "Attempted" 1
+-  WriteRegDWORD HKLM "Software\Mozilla\MaintenanceService" "Installed" 1
+-  DeleteRegValue HKLM "Software\Mozilla\MaintenanceService" "FFPrefetchDisabled"
++  WriteRegDWORD HKLM "Software\Ablaze\MaintenanceService" "Attempted" 1
++  WriteRegDWORD HKLM "Software\Ablaze\MaintenanceService" "Installed" 1
++  DeleteRegValue HKLM "Software\Ablaze\MaintenanceService" "FFPrefetchDisabled"
+ 
+   ; Included here for debug purposes only.  
+   ; These keys are used to bypass the installation dir is a valid installation
+@@ -258,8 +258,8 @@ Section "Uninstall"
+   ${OrIf} ${IsNativeARM64}
+     SetRegView 64
+   ${EndIf}
+-  DeleteRegValue HKLM "Software\Mozilla\MaintenanceService" "Installed"
+-  DeleteRegValue HKLM "Software\Mozilla\MaintenanceService" "FFPrefetchDisabled"
++  DeleteRegValue HKLM "Software\Ablaze\MaintenanceService" "Installed"
++  DeleteRegValue HKLM "Software\Ablaze\MaintenanceService" "FFPrefetchDisabled"
+   DeleteRegKey HKLM "${FallbackKey}\"
+   ${If} ${RunningX64}
+   ${OrIf} ${IsNativeARM64}
+diff --git a/toolkit/crashreporter/client/crashreporter_win.cpp b/toolkit/crashreporter/client/crashreporter_win.cpp
+index 77621779e6..9f5db66728 100644
+--- a/toolkit/crashreporter/client/crashreporter_win.cpp
++++ b/toolkit/crashreporter/client/crashreporter_win.cpp
+@@ -80,7 +80,7 @@ static SendThreadData gSendData = {
+ };
+ static vector<string> gRestartArgs;
+ static Json::Value gQueryParameters;
+-static wstring gCrashReporterKey(L"Software\\Mozilla\\Crash Reporter");
++static wstring gCrashReporterKey(L"Software\\Ablaze\\Crash Reporter");
+ static string gURLParameter;
+ static int gCheckboxPadding = 6;
+ static bool gRTLlayout = false;
+diff --git a/toolkit/crashreporter/google-breakpad/src/tools/windows/converter_exe/converter.cc b/toolkit/crashreporter/google-breakpad/src/tools/windows/converter_exe/converter.cc
+index 5b70903a4d..99a5191959 100644
+--- a/toolkit/crashreporter/google-breakpad/src/tools/windows/converter_exe/converter.cc
++++ b/toolkit/crashreporter/google-breakpad/src/tools/windows/converter_exe/converter.cc
+@@ -378,7 +378,7 @@ static void ConvertMissingSymbolFile(const MissingSymbolInfo &missing_info,
+     // symbol server when crashes occur in Google extension code hosted by a
+     // Firefox process.
+     if (_stricmp(code_extension.c_str(), ".exe") == 0 &&
+-        _stricmp(missing_info.code_file.c_str(), "firefox.exe") != 0) {
++        _stricmp(missing_info.code_file.c_str(), "floorp.exe") != 0) {
+       is_exe = true;
+     }
+   }
+diff --git a/toolkit/mozapps/defaultagent/Policy.cpp b/toolkit/mozapps/defaultagent/Policy.cpp
+index 56d868866b..ed29242a0a 100644
+--- a/toolkit/mozapps/defaultagent/Policy.cpp
++++ b/toolkit/mozapps/defaultagent/Policy.cpp
+@@ -30,7 +30,7 @@
+ // The Firefox policy engine hardcodes the string "Mozilla" in its registry
+ // key accesses rather than using the configured vendor name, so we should do
+ // the same here to be sure we're compatible with it.
+-#define POLICY_REGKEY_NAME L"SOFTWARE\\Policies\\Mozilla\\" MOZ_APP_BASENAME
++#define POLICY_REGKEY_NAME L"SOFTWARE\\Policies\\Ablaze\\" MOZ_APP_BASENAME
+ 
+ // This enum is the return type for the functions that check policy values.
+ enum class PolicyState {
+diff --git a/toolkit/mozapps/defaultagent/SetDefaultBrowser.cpp b/toolkit/mozapps/defaultagent/SetDefaultBrowser.cpp
+index c16255a48a..4e545133a7 100644
+--- a/toolkit/mozapps/defaultagent/SetDefaultBrowser.cpp
++++ b/toolkit/mozapps/defaultagent/SetDefaultBrowser.cpp
+@@ -202,19 +202,19 @@ static bool VerifyUserDefault(const wchar_t* aExt, const wchar_t* aProgID) {
+ 
+ HRESULT SetDefaultBrowserUserChoice(
+     const wchar_t* aAumi, const wchar_t* const* aExtraFileExtensions) {
+-  auto urlProgID = FormatProgID(L"FirefoxURL", aAumi);
++  auto urlProgID = FormatProgID(L"FloorpURL", aAumi);
+   if (!CheckProgIDExists(urlProgID.get())) {
+     LOG_ERROR_MESSAGE(L"ProgID %s not found", urlProgID.get());
+     return MOZ_E_NO_PROGID;
+   }
+ 
+-  auto htmlProgID = FormatProgID(L"FirefoxHTML", aAumi);
++  auto htmlProgID = FormatProgID(L"FloorpHTML", aAumi);
+   if (!CheckProgIDExists(htmlProgID.get())) {
+     LOG_ERROR_MESSAGE(L"ProgID %s not found", htmlProgID.get());
+     return MOZ_E_NO_PROGID;
+   }
+ 
+-  auto pdfProgID = FormatProgID(L"FirefoxPDF", aAumi);
++  auto pdfProgID = FormatProgID(L"FloorpPDF", aAumi);
+   if (!CheckProgIDExists(pdfProgID.get())) {
+     LOG_ERROR_MESSAGE(L"ProgID %s not found", pdfProgID.get());
+     return MOZ_E_NO_PROGID;
+diff --git a/toolkit/mozapps/defaultagent/tests/gtest/SetDefaultBrowserTest.cpp b/toolkit/mozapps/defaultagent/tests/gtest/SetDefaultBrowserTest.cpp
+index ba85b0a105..da96985c9e 100644
+--- a/toolkit/mozapps/defaultagent/tests/gtest/SetDefaultBrowserTest.cpp
++++ b/toolkit/mozapps/defaultagent/tests/gtest/SetDefaultBrowserTest.cpp
+@@ -18,14 +18,14 @@ TEST(SetDefaultBrowserUserChoice, Hash)
+ 
+   // length mod 8 = 0
+   EXPECT_STREQ(
+-      GenerateUserChoiceHash(L"https", sid, L"FirefoxURL-308046B0AF4A39CB",
++      GenerateUserChoiceHash(L"https", sid, L"FloorpURL-308046B0AF4A39CB",
+                              (SYSTEMTIME){2021, 4, 1, 19, 23, 7, 56, 506})
+           .get(),
+       L"uzpIsMVyZ1g=");
+ 
+   // length mod 8 = 2 (confirm that the incomplete last block is dropped)
+   EXPECT_STREQ(
+-      GenerateUserChoiceHash(L".html", sid, L"FirefoxHTML-308046B0AF4A39CB",
++      GenerateUserChoiceHash(L".html", sid, L"FloorpHTML-308046B0AF4A39CB",
+                              (SYSTEMTIME){2021, 4, 1, 19, 23, 7, 56, 519})
+           .get(),
+       L"7fjRtUPASlc=");
+@@ -46,7 +46,7 @@ TEST(SetDefaultBrowserUserChoice, Hash)
+ 
+   // non-ASCII
+   EXPECT_STREQ(
+-      GenerateUserChoiceHash(L".html", sid, L"FirefoxHTML-ÀBÇDË😀†",
++      GenerateUserChoiceHash(L".html", sid, L"FloorpHTML-ÀBÇDË😀†",
+                              (SYSTEMTIME){2021, 4, 2, 20, 0, 38, 55, 101})
+           .get(),
+       L"F3NsK3uNv5E=");
+diff --git a/toolkit/mozapps/extensions/test/xpcshell/test_registry.js b/toolkit/mozapps/extensions/test/xpcshell/test_registry.js
+index c241a18e0a..dce2b64ff0 100644
+--- a/toolkit/mozapps/extensions/test/xpcshell/test_registry.js
++++ b/toolkit/mozapps/extensions/test/xpcshell/test_registry.js
+@@ -46,13 +46,13 @@ add_task(async function setup() {
+ add_task(async function test_1() {
+   registry.setValue(
+     Ci.nsIWindowsRegKey.ROOT_KEY_LOCAL_MACHINE,
+-    "SOFTWARE\\Mozilla\\XPCShell\\Extensions",
++    "SOFTWARE\\Ablaze\\XPCShell\\Extensions",
+     ID1,
+     xpi1.path
+   );
+   registry.setValue(
+     Ci.nsIWindowsRegKey.ROOT_KEY_CURRENT_USER,
+-    "SOFTWARE\\Mozilla\\XPCShell\\Extensions",
++    "SOFTWARE\\Ablaze\\XPCShell\\Extensions",
+     ID2,
+     xpi2.path
+   );
+@@ -75,13 +75,13 @@ add_task(async function test_1() {
+ add_task(async function test_2() {
+   registry.setValue(
+     Ci.nsIWindowsRegKey.ROOT_KEY_LOCAL_MACHINE,
+-    "SOFTWARE\\Mozilla\\XPCShell\\Extensions",
++    "SOFTWARE\\Ablaze\\XPCShell\\Extensions",
+     ID1,
+     null
+   );
+   registry.setValue(
+     Ci.nsIWindowsRegKey.ROOT_KEY_CURRENT_USER,
+-    "SOFTWARE\\Mozilla\\XPCShell\\Extensions",
++    "SOFTWARE\\Ablaze\\XPCShell\\Extensions",
+     ID2,
+     null
+   );
+@@ -97,13 +97,13 @@ add_task(async function test_2() {
+ add_task(async function test_3() {
+   registry.setValue(
+     Ci.nsIWindowsRegKey.ROOT_KEY_LOCAL_MACHINE,
+-    "SOFTWARE\\Mozilla\\XPCShell\\Extensions",
++    "SOFTWARE\\Ablaze\\XPCShell\\Extensions",
+     ID1,
+     xpi2.path
+   );
+   registry.setValue(
+     Ci.nsIWindowsRegKey.ROOT_KEY_CURRENT_USER,
+-    "SOFTWARE\\Mozilla\\XPCShell\\Extensions",
++    "SOFTWARE\\Ablaze\\XPCShell\\Extensions",
+     ID2,
+     xpi1.path
+   );
+@@ -122,13 +122,13 @@ add_task(async function test_4() {
+ 
+   registry.setValue(
+     Ci.nsIWindowsRegKey.ROOT_KEY_LOCAL_MACHINE,
+-    "SOFTWARE\\Mozilla\\XPCShell\\Extensions",
++    "SOFTWARE\\Ablaze\\XPCShell\\Extensions",
+     ID1,
+     null
+   );
+   registry.setValue(
+     Ci.nsIWindowsRegKey.ROOT_KEY_CURRENT_USER,
+-    "SOFTWARE\\Mozilla\\XPCShell\\Extensions",
++    "SOFTWARE\\Ablaze\\XPCShell\\Extensions",
+     ID2,
+     null
+   );
+@@ -137,7 +137,7 @@ add_task(async function test_4() {
+ 
+   registry.setValue(
+     Ci.nsIWindowsRegKey.ROOT_KEY_LOCAL_MACHINE,
+-    "SOFTWARE\\Mozilla\\XPCShell\\Extensions",
++    "SOFTWARE\\Ablaze\\XPCShell\\Extensions",
+     ID1,
+     xpi1.path
+   );
+@@ -146,13 +146,13 @@ add_task(async function test_4() {
+ 
+   registry.setValue(
+     Ci.nsIWindowsRegKey.ROOT_KEY_LOCAL_MACHINE,
+-    "SOFTWARE\\Mozilla\\XPCShell\\Extensions",
++    "SOFTWARE\\Ablaze\\XPCShell\\Extensions",
+     ID1,
+     null
+   );
+   registry.setValue(
+     Ci.nsIWindowsRegKey.ROOT_KEY_CURRENT_USER,
+-    "SOFTWARE\\Mozilla\\XPCShell\\Extensions",
++    "SOFTWARE\\Ablaze\\XPCShell\\Extensions",
+     ID2,
+     xpi1.path
+   );
+diff --git a/toolkit/mozapps/installer/windows/nsis/common.nsh b/toolkit/mozapps/installer/windows/nsis/common.nsh
+index 9ae555e93e..aeef6d27d4 100755
+--- a/toolkit/mozapps/installer/windows/nsis/common.nsh
++++ b/toolkit/mozapps/installer/windows/nsis/common.nsh
+@@ -538,7 +538,7 @@
+ 
+       ; Add our subdirectory, this is hardcoded as grandparent of the update directory in
+       ; several other places.
+-      StrCpy $0 "$0\Mozilla-1de4eec8-1241-4177-a864-e594e8d1fb38"
++      StrCpy $0 "$0\Ablaze-1de4eec8-1241-4177-a864-e594e8d1fb38"
+ 
+       Exch $0   ; Restore original $0 and put our $0 on the stack.
+     FunctionEnd
+@@ -1205,7 +1205,7 @@
+  *
+  * @param   _KEY ($R1)
+  *          Sub key containing all the installer prefs
+- *          Usually "Software\Mozilla\${AppName}"
++ *          Usually "Software\Ablaze\${AppName}"
+  * @param   _PREF ($R2)
+  *          Name of the pref to look up
+  * @return  _RESULT ($R3)
+@@ -1670,7 +1670,7 @@
+  * registry hive so you must call SetShellVarContext first.
+  *
+  * @param   _KEY
+- *          The registry subkey (typically this will be Software\Mozilla).
++ *          The registry subkey (typically this will be Software\Ablaze).
+  * @return  _RESULT
+  *          false if a second install isn't found, path to the main exe if a
+  *          second install is found.
+@@ -1788,7 +1788,7 @@
+  * first.
+  *
+  * @param   _KEY
+- *          The registry subkey (typically this will be Software\Mozilla\App Name).
++ *          The registry subkey (typically this will be Software\Ablaze\App Name).
+  * @return  _RESULT
+  *          false if a single install location for this app name isn't found,
+  *          path to the install directory if a single install location is found.
+@@ -1904,7 +1904,7 @@
+  * The shell context and the registry view should already have been set.
+  *
+  * @param   _KEY
+- *          The registry subkey (typically Software\Mozilla\App Name).
++ *          The registry subkey (typically Software\Ablaze\App Name).
+  * @return  _RESULT
+  *          path to the install directory of the first location found, or
+  *          the string "false" if no existing installation was found.
+@@ -2606,7 +2606,7 @@
+  * call SetShellVarContext first.
+  *
+  * @param   _KEY
+- *          The registry subkey (typically this will be Software\Mozilla).
++ *          The registry subkey (typically this will be Software\Ablaze).
+  *
+  * $0  = loop counter
+  * $1  = temporary value used for string searches
+@@ -2853,7 +2853,7 @@
+  *
+  * @param   _KEY ($R1)
+  *          The registry subkey
+- *          (typically this will be Software\Mozilla\${AppName}).
++ *          (typically this will be Software\Ablaze\${AppName}).
+  */
+ !macro RegCleanPrefs
+   !ifndef ${_MOZFUNC_UN}RegCleanPrefs
+@@ -5806,7 +5806,7 @@
+ !ifmacrodef InitHashAppModelId
+       ; setup the application model id registration value
+       !ifdef AppName
+-      ${InitHashAppModelId} "$INSTDIR" "Software\Mozilla\${AppName}\TaskBarIDs"
++      ${InitHashAppModelId} "$INSTDIR" "Software\Ablaze\${AppName}\TaskBarIDs"
+       !endif
+ !endif
+ 
+@@ -6029,12 +6029,12 @@
+         ; And verify that if we need to, we're going to clean up the registry
+         ; correctly.
+         ${If} "$R4" == "mms"
+-          WriteRegStr HKLM "Software\Mozilla" "${BrandShortName}InstallerTest" "Write Test"
++          WriteRegStr HKLM "Software\Ablaze" "${BrandShortName}InstallerTest" "Write Test"
+           ${If} ${Errors}
+             ; Nothing initialized so no need to call OnEndCommon
+             Quit
+           ${Endif}
+-          DeleteRegValue HKLM "Software\Mozilla" "${BrandShortName}InstallerTest"
++          DeleteRegValue HKLM "Software\Ablaze" "${BrandShortName}InstallerTest"
+         ${EndIf}
+       !endif
+ 
+@@ -6143,20 +6143,20 @@
+       ${If} ${IsNativeAMD64}
+       ${OrIf} ${IsNativeARM64}
+         SetRegView 64
+-        ${GetSingleInstallPath} "Software\Mozilla\${BrandFullNameInternal}" $R9
++        ${GetSingleInstallPath} "Software\Ablaze\${BrandFullNameInternal}" $R9
+         SetRegView lastused
+       ${EndIf}
+ 
+       StrCmp "$R9" "false" +1 finish_get_install_dir
+ 
+       SetRegView 32
+-      ${GetSingleInstallPath} "Software\Mozilla\${BrandFullNameInternal}" $R9
++      ${GetSingleInstallPath} "Software\Ablaze\${BrandFullNameInternal}" $R9
+       SetRegView lastused
+ 
+       StrCmp "$R9" "false" +1 finish_get_install_dir
+ 
+       SetShellVarContext current  ; Set SHCTX to HKCU
+-      ${GetSingleInstallPath} "Software\Mozilla\${BrandFullNameInternal}" $R9
++      ${GetSingleInstallPath} "Software\Ablaze\${BrandFullNameInternal}" $R9
+ 
+       finish_get_install_dir:
+       StrCmp "$R9" "false" +2 +1
+@@ -7823,7 +7823,7 @@
+  *          The main application executable path
+  * @param   _REG_PATH
+  *          The HKLM/HKCU agnostic registry path where the key hash should
+- *          be stored. ex: "Software\Mozilla\Firefox\TaskBarIDs"
++ *          be stored. ex: "Software\Ablaze\Floorp\TaskBarIDs"
+  * @result  (Var) $AppUserModelID and $AppUserModelIDPrivate contain the
+  *          app model id and the private app model id, respectively.
+  */
+@@ -7945,11 +7945,11 @@
+   StrCpy $R0 ""
+   ; Look for an install-specific profile, which might be listed as
+   ; either a relative or an absolute path (installs.ini doesn't say which).
+-  ${If} ${FileExists} "$APPDATA\Mozilla\Firefox\installs.ini"
++  ${If} ${FileExists} "$APPDATA\Ablaze\Floorp\installs.ini"
+     ClearErrors
+-    ReadINIStr $1 "$APPDATA\Mozilla\Firefox\installs.ini" "$AppUserModelID" "Default"
++    ReadINIStr $1 "$APPDATA\Ablaze\Floorp\installs.ini" "$AppUserModelID" "Default"
+     ${IfNot} ${Errors}
+-      ${${_MOZFUNC_UN}GetLongPath} "$APPDATA\Mozilla\Firefox\$1" $2
++      ${${_MOZFUNC_UN}GetLongPath} "$APPDATA\Ablaze\Floorp\$1" $2
+       ${If} ${FileExists} $2
+         StrCpy $R0 $2
+       ${Else}
+diff --git a/toolkit/mozapps/update/UpdateTelemetry.jsm b/toolkit/mozapps/update/UpdateTelemetry.jsm
+index e75fd50486..65b6119de8 100644
+--- a/toolkit/mozapps/update/UpdateTelemetry.jsm
++++ b/toolkit/mozapps/update/UpdateTelemetry.jsm
+@@ -507,7 +507,7 @@ var AUSTLMY = {
+       );
+       wrk.open(
+         wrk.ROOT_KEY_LOCAL_MACHINE,
+-        "SOFTWARE\\Mozilla\\MaintenanceService",
++        "SOFTWARE\\Ablaze\\MaintenanceService",
+         wrk.ACCESS_READ | wrk.WOW64_64
+       );
+       // Was the service at some point installed, but is now uninstalled?
+diff --git a/toolkit/mozapps/update/common/pathhash.cpp b/toolkit/mozapps/update/common/pathhash.cpp
+index e70f69a755..6ff61e6a89 100644
+--- a/toolkit/mozapps/update/common/pathhash.cpp
++++ b/toolkit/mozapps/update/common/pathhash.cpp
+@@ -119,7 +119,7 @@ BOOL CalculateRegistryPathFromFilePath(const LPCWSTR filePath,
+   delete[] lowercasePath;
+ 
+   LPCWSTR baseRegPath =
+-      L"SOFTWARE\\Mozilla\\"
++      L"SOFTWARE\\Ablaze\\"
+       L"MaintenanceService\\";
+   wcsncpy(registryPath, baseRegPath, MAX_PATH);
+   BinaryDataToHexString(hash, hashSize, registryPath + wcslen(baseRegPath));
+diff --git a/toolkit/mozapps/update/common/updatehelper.h b/toolkit/mozapps/update/common/updatehelper.h
+index b346893835..d90be13ca5 100644
+--- a/toolkit/mozapps/update/common/updatehelper.h
++++ b/toolkit/mozapps/update/common/updatehelper.h
+@@ -26,7 +26,7 @@ void RemoveSecureOutputFiles(LPCWSTR patchDirPath);
+ #ifdef MOZ_MAINTENANCE_SERVICE
+ #  define SVC_NAME L"MozillaMaintenance"
+ 
+-#  define BASE_SERVICE_REG_KEY L"SOFTWARE\\Mozilla\\MaintenanceService"
++#  define BASE_SERVICE_REG_KEY L"SOFTWARE\\Ablaze\\MaintenanceService"
+ 
+ // The test only fallback key, as its name implies, is only present on machines
+ // that will use automated tests.  Since automated tests always run from a
+diff --git a/toolkit/mozapps/update/tests/data/xpcshellUtilsAUS.js b/toolkit/mozapps/update/tests/data/xpcshellUtilsAUS.js
+index 427e23cfe7..cfe0e176f5 100644
+--- a/toolkit/mozapps/update/tests/data/xpcshellUtilsAUS.js
++++ b/toolkit/mozapps/update/tests/data/xpcshellUtilsAUS.js
+@@ -2388,7 +2388,7 @@ function shouldRunServiceTest() {
+   let isBinSigned = isBinarySigned(updaterBinPath);
+ 
+   const REG_PATH =
+-    "SOFTWARE\\Mozilla\\MaintenanceService\\" +
++    "SOFTWARE\\Ablaze\\MaintenanceService\\" +
+     "3932ecacee736d366d6436db0f55bce4";
+   let key = Cc["@mozilla.org/windows-registry-key;1"].createInstance(
+     Ci.nsIWindowsRegKey
+diff --git a/toolkit/xre/PolicyChecks.h b/toolkit/xre/PolicyChecks.h
+index 9b6cfaf9c8..00b862ab7d 100644
+--- a/toolkit/xre/PolicyChecks.h
++++ b/toolkit/xre/PolicyChecks.h
+@@ -11,7 +11,7 @@
+ 
+ #  include <windows.h>
+ 
+-#  define POLICY_REGKEY_NAME L"SOFTWARE\\Policies\\Mozilla\\" MOZ_APP_BASENAME
++#  define POLICY_REGKEY_NAME L"SOFTWARE\\Policies\\Ablaze\\" MOZ_APP_BASENAME
+ 
+ // NB: This code must be able to run apart from XPCOM
+ 
+diff --git a/widget/windows/WinTaskbar.cpp b/widget/windows/WinTaskbar.cpp
+index 93c223db2e..1c55b92191 100644
+--- a/widget/windows/WinTaskbar.cpp
++++ b/widget/windows/WinTaskbar.cpp
+@@ -237,7 +237,7 @@ bool WinTaskbar::GenerateAppUserModelID(nsAString& aAppUserModelId,
+   nsCString appName;
+   if (appInfo && NS_SUCCEEDED(appInfo->GetName(appName))) {
+     nsAutoString regKey;
+-    regKey.AssignLiteral("Software\\Mozilla\\");
++    regKey.AssignLiteral("Software\\Ablaze\\");
+     AppendASCIItoUTF16(appName, regKey);
+     regKey.AppendLiteral("\\TaskBarIDs");
+ 
+diff --git a/widget/windows/tests/TestUrisToValidate.h b/widget/windows/tests/TestUrisToValidate.h
+index cb00366d1e..e2d0b6835b 100644
+--- a/widget/windows/tests/TestUrisToValidate.h
++++ b/widget/windows/tests/TestUrisToValidate.h
+@@ -23,12 +23,12 @@ const wchar_t* kTestUris[] = {
+     L"file:///%.txt",
+     L"file:///%00.txt",
+     L"file:///%41%2D%31%5Ftest%22ing?%41%31%00.txt",
+-    L"firefox.url:%.txt",
+-    L"firefox.url:%00.txt",
+-    L"firefox.url:%41%2D%31%5Ftest&quot;ing?%41%31%00.txt",
+-    L"firefoxurl:%.txt",
+-    L"firefoxurl:%00.txt",
+-    L"firefoxurl:%41%2D%31%5Ftest&quot;ing?%41%31%00.txt",
++    L"floorp.url:%.txt",
++    L"floorp.url:%00.txt",
++    L"floorp.url:%41%2D%31%5Ftest&quot;ing?%41%31%00.txt",
++    L"floorpurl:%.txt",
++    L"floorpurl:%00.txt",
++    L"floorpurl:%41%2D%31%5Ftest&quot;ing?%41%31%00.txt",
+     L"ftp:%.txt",
+     L"ftp:%00.txt",
+     L"ftp:%41%2D%31%5Ftest&quot;ing?%41%31%00.txt",
+diff --git a/xpcom/tests/TestWinReg.js b/xpcom/tests/TestWinReg.js
+index 5558cf69c9..9bacdfac06 100644
+--- a/xpcom/tests/TestWinReg.js
++++ b/xpcom/tests/TestWinReg.js
+@@ -7,7 +7,7 @@
+  */
+ 
+ const nsIWindowsRegKey = Ci.nsIWindowsRegKey;
+-const BASE_PATH = "SOFTWARE\\Mozilla\\Firefox";
++const BASE_PATH = "SOFTWARE\\Ablaze\\Floorp";
+ 
+ function idump(indent, str) {
+   for (var j = 0; j < indent; ++j) {
+-- 
+2.25.1
+

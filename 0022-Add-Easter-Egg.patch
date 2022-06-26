@@ -1,0 +1,42 @@
+From 5e82ab6f042601c021f6b446aba84e029986258c Mon Sep 17 00:00:00 2001
+From: surapunoyousei <ryosukeusuusu@gmail.com>
+Date: Sun, 26 Jun 2022 18:38:19 +0900
+Subject: [PATCH 22/24] Add Easter Egg
+
+---
+ browser/components/about/AboutRedirector.cpp | 6 ++++++
+ browser/components/about/components.conf     | 1 +
+ 2 files changed, 7 insertions(+)
+
+diff --git a/browser/components/about/AboutRedirector.cpp b/browser/components/about/AboutRedirector.cpp
+index ce25ab082a..e0aeef6ca6 100644
+--- a/browser/components/about/AboutRedirector.cpp
++++ b/browser/components/about/AboutRedirector.cpp
+@@ -53,6 +53,12 @@ static const RedirEntry kRedirMap[] = {
+      nsIAboutModule::URI_SAFE_FOR_UNTRUSTED_CONTENT |
+          nsIAboutModule::URI_CAN_LOAD_IN_CHILD | nsIAboutModule::ALLOW_SCRIPT |
+          nsIAboutModule::HIDE_FROM_ABOUTABOUT},
++     // Floorp dino    
++    {"dino", "chrome://browser/skin/dino.html",
++     nsIAboutModule::ALLOW_SCRIPT | nsIAboutModule::URI_MUST_LOAD_IN_CHILD |
++         nsIAboutModule::URI_CAN_LOAD_IN_PRIVILEGEDABOUT_PROCESS |
++         nsIAboutModule::URI_SAFE_FOR_UNTRUSTED_CONTENT |
++         nsIAboutModule::IS_SECURE_CHROME_UI},
+     {"unloads", "chrome://browser/content/tabunloader/aboutUnloads.html",
+      nsIAboutModule::ALLOW_SCRIPT},
+     {"framecrashed", "chrome://browser/content/aboutFrameCrashed.html",
+diff --git a/browser/components/about/components.conf b/browser/components/about/components.conf
+index 413718575a..9d0863a53f 100644
+--- a/browser/components/about/components.conf
++++ b/browser/components/about/components.conf
+@@ -7,6 +7,7 @@
+ pages = [
+     'blocked',
+     'certerror',
++    'dino',
+     'downloads',
+     'framecrashed',
+     'home',
+-- 
+2.25.1
+

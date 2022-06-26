@@ -1,0 +1,26 @@
+From 931167f94a8862f6983c9a3771bf8c9548aba999 Mon Sep 17 00:00:00 2001
+From: surapunoyousei <ryosukeusuusu@gmail.com>
+Date: Sun, 26 Jun 2022 18:24:51 +0900
+Subject: [PATCH 16/24] allow Themes can use "-moz-bool-pref"
+
+---
+ layout/style/URLExtraData.h | 3 ++-
+ 1 file changed, 2 insertions(+), 1 deletion(-)
+
+diff --git a/layout/style/URLExtraData.h b/layout/style/URLExtraData.h
+index 9b715b5239..10eee65c20 100644
+--- a/layout/style/URLExtraData.h
++++ b/layout/style/URLExtraData.h
+@@ -35,7 +35,8 @@ struct URLExtraData {
+     // equal to the sheet URI.
+     nsCOMPtr<nsIURI> referrer = mReferrerInfo->GetOriginalReferrer();
+     mChromeRulesEnabled = referrer && (referrer->SchemeIs("chrome") ||
+-                                       referrer->SchemeIs("resource"));
++                                       referrer->SchemeIs("resource") ||
++                                       referrer->SchemeIs("moz-extension"));
+   }
+ 
+   URLExtraData(nsIURI* aBaseURI, nsIReferrerInfo* aReferrerInfo,
+-- 
+2.25.1
+

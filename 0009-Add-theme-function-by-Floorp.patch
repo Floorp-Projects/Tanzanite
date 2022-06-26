@@ -1,0 +1,479 @@
+From e53645b13e183be03a47603572d1eccc206f2f8b Mon Sep 17 00:00:00 2001
+From: surapunoyousei <ryosukeusuusu@gmail.com>
+Date: Sun, 26 Jun 2022 18:10:08 +0900
+Subject: [PATCH 09/24] Add theme function by Floorp
+
+---
+ browser/themes/BuiltInThemeConfig.jsm        | 38 ++++-----
+ browser/themes/addons/jar.mn                 |  8 ++
+ browser/themes/addons/material/icon.svg      |  7 ++
+ browser/themes/addons/material/manifest.json | 85 ++++++++++++++++++++
+ browser/themes/addons/material/preview.svg   | 21 +++++
+ browser/themes/addons/photon/icon.svg        |  7 ++
+ browser/themes/addons/photon/manifest.json   | 48 +++++++++++
+ browser/themes/addons/photon/preview.svg     | 17 ++++
+ 8 files changed, 207 insertions(+), 24 deletions(-)
+ create mode 100644 browser/themes/addons/material/icon.svg
+ create mode 100644 browser/themes/addons/material/manifest.json
+ create mode 100644 browser/themes/addons/material/preview.svg
+ create mode 100644 browser/themes/addons/photon/icon.svg
+ create mode 100644 browser/themes/addons/photon/manifest.json
+ create mode 100644 browser/themes/addons/photon/preview.svg
+
+diff --git a/browser/themes/BuiltInThemeConfig.jsm b/browser/themes/BuiltInThemeConfig.jsm
+index 3d077cf992..4f40ef9602 100644
+--- a/browser/themes/BuiltInThemeConfig.jsm
++++ b/browser/themes/BuiltInThemeConfig.jsm
+@@ -53,7 +53,6 @@ const BuiltInThemeConfig = new Map([
+     {
+       version: "1.0",
+       path: "resource://builtin-themes/monochromatic/2022red/",
+-      collection: "true-colors",
+     },
+   ],
+   [
+@@ -61,7 +60,6 @@ const BuiltInThemeConfig = new Map([
+     {
+       version: "1.0",
+       path: "resource://builtin-themes/monochromatic/2022orange/",
+-      collection: "true-colors",
+     },
+   ],
+   [
+@@ -69,7 +67,6 @@ const BuiltInThemeConfig = new Map([
+     {
+       version: "1.0",
+       path: "resource://builtin-themes/monochromatic/2022green/",
+-      collection: "true-colors",
+     },
+   ],
+   [
+@@ -77,7 +74,6 @@ const BuiltInThemeConfig = new Map([
+     {
+       version: "1.0",
+       path: "resource://builtin-themes/monochromatic/2022yellow/",
+-      collection: "true-colors",
+     },
+   ],
+   [
+@@ -85,7 +81,6 @@ const BuiltInThemeConfig = new Map([
+     {
+       version: "1.0",
+       path: "resource://builtin-themes/monochromatic/2022purple/",
+-      collection: "true-colors",
+     },
+   ],
+   [
+@@ -93,7 +88,6 @@ const BuiltInThemeConfig = new Map([
+     {
+       version: "1.0",
+       path: "resource://builtin-themes/monochromatic/2022blue/",
+-      collection: "true-colors",
+     },
+   ],
+   [
+@@ -101,7 +95,6 @@ const BuiltInThemeConfig = new Map([
+     {
+       version: "1.0",
+       path: "resource://builtin-themes/monochromatic/lush/soft/",
+-      collection: "life-in-color",
+     },
+   ],
+   [
+@@ -109,7 +102,6 @@ const BuiltInThemeConfig = new Map([
+     {
+       version: "1.0",
+       path: "resource://builtin-themes/monochromatic/lush/balanced/",
+-      collection: "life-in-color",
+     },
+   ],
+   [
+@@ -117,7 +109,6 @@ const BuiltInThemeConfig = new Map([
+     {
+       version: "1.0",
+       path: "resource://builtin-themes/monochromatic/lush/bold/",
+-      collection: "life-in-color",
+     },
+   ],
+   [
+@@ -125,7 +116,6 @@ const BuiltInThemeConfig = new Map([
+     {
+       version: "1.0",
+       path: "resource://builtin-themes/monochromatic/abstract/soft/",
+-      collection: "life-in-color",
+     },
+   ],
+   [
+@@ -133,7 +123,6 @@ const BuiltInThemeConfig = new Map([
+     {
+       version: "1.0",
+       path: "resource://builtin-themes/monochromatic/abstract/balanced/",
+-      collection: "life-in-color",
+     },
+   ],
+   [
+@@ -141,7 +130,6 @@ const BuiltInThemeConfig = new Map([
+     {
+       version: "1.0",
+       path: "resource://builtin-themes/monochromatic/abstract/bold/",
+-      collection: "life-in-color",
+     },
+   ],
+   [
+@@ -149,7 +137,6 @@ const BuiltInThemeConfig = new Map([
+     {
+       version: "1.0",
+       path: "resource://builtin-themes/monochromatic/elemental/soft/",
+-      collection: "life-in-color",
+     },
+   ],
+   [
+@@ -157,7 +144,6 @@ const BuiltInThemeConfig = new Map([
+     {
+       version: "1.0",
+       path: "resource://builtin-themes/monochromatic/elemental/balanced/",
+-      collection: "life-in-color",
+     },
+   ],
+   [
+@@ -165,7 +151,6 @@ const BuiltInThemeConfig = new Map([
+     {
+       version: "1.0",
+       path: "resource://builtin-themes/monochromatic/elemental/bold/",
+-      collection: "life-in-color",
+     },
+   ],
+   [
+@@ -173,7 +158,6 @@ const BuiltInThemeConfig = new Map([
+     {
+       version: "1.0",
+       path: "resource://builtin-themes/monochromatic/cheers/soft/",
+-      collection: "life-in-color",
+     },
+   ],
+   [
+@@ -181,7 +165,6 @@ const BuiltInThemeConfig = new Map([
+     {
+       version: "1.0",
+       path: "resource://builtin-themes/monochromatic/cheers/balanced/",
+-      collection: "life-in-color",
+     },
+   ],
+   [
+@@ -189,7 +172,6 @@ const BuiltInThemeConfig = new Map([
+     {
+       version: "1.0",
+       path: "resource://builtin-themes/monochromatic/cheers/bold/",
+-      collection: "life-in-color",
+     },
+   ],
+   [
+@@ -197,7 +179,6 @@ const BuiltInThemeConfig = new Map([
+     {
+       version: "1.0",
+       path: "resource://builtin-themes/monochromatic/graffiti/soft/",
+-      collection: "life-in-color",
+     },
+   ],
+   [
+@@ -205,7 +186,6 @@ const BuiltInThemeConfig = new Map([
+     {
+       version: "1.0",
+       path: "resource://builtin-themes/monochromatic/graffiti/balanced/",
+-      collection: "life-in-color",
+     },
+   ],
+   [
+@@ -213,7 +193,6 @@ const BuiltInThemeConfig = new Map([
+     {
+       version: "1.0",
+       path: "resource://builtin-themes/monochromatic/graffiti/bold/",
+-      collection: "life-in-color",
+     },
+   ],
+   [
+@@ -221,7 +200,6 @@ const BuiltInThemeConfig = new Map([
+     {
+       version: "1.0",
+       path: "resource://builtin-themes/monochromatic/foto/soft/",
+-      collection: "life-in-color",
+     },
+   ],
+   [
+@@ -229,7 +207,6 @@ const BuiltInThemeConfig = new Map([
+     {
+       version: "1.0",
+       path: "resource://builtin-themes/monochromatic/foto/balanced/",
+-      collection: "life-in-color",
+     },
+   ],
+   [
+@@ -237,7 +214,20 @@ const BuiltInThemeConfig = new Map([
+     {
+       version: "1.0",
+       path: "resource://builtin-themes/monochromatic/foto/bold/",
+-      collection: "life-in-color",
++    },
++  ],
++  [
++    "floorp-material@mozilla.org",
++    {
++      version: "1.0",
++      path: "resource://builtin-themes/material/",
++    },
++  ],
++  [
++    "floorp-photon@mozilla.org",
++    {
++      version: "1.0",
++      path: "resource://builtin-themes/photon/",
+     },
+   ],
+ ]);
+diff --git a/browser/themes/addons/jar.mn b/browser/themes/addons/jar.mn
+index 271106757c..a471a1af27 100644
+--- a/browser/themes/addons/jar.mn
++++ b/browser/themes/addons/jar.mn
+@@ -16,6 +16,14 @@ browser.jar:
+   content/builtin-themes/light                     (light/*.css)
+   content/builtin-themes/light/manifest.json       (light/manifest.json)
+ 
++  content/builtin-themes/photon                    (photon/*.svg)
++  content/builtin-themes/photon                    (photon/*.css)
++  content/builtin-themes/photon/manifest.json      (photon/manifest.json)
++
++  content/builtin-themes/material                  (material/*.svg)
++  content/builtin-themes/material                  (material/*.css)
++  content/builtin-themes/material/manifest.json    (material/manifest.json)
++
+   content/builtin-themes/monochromatic/lush/soft                          (monochromatic/lush/soft/*.svg)
+   content/builtin-themes/monochromatic/lush/soft/manifest.json            (monochromatic/lush/soft/manifest.json)
+   content/builtin-themes/monochromatic/lush/balanced                      (monochromatic/lush/balanced/*.svg)
+diff --git a/browser/themes/addons/material/icon.svg b/browser/themes/addons/material/icon.svg
+new file mode 100644
+index 0000000000..6f9edeb247
+--- /dev/null
++++ b/browser/themes/addons/material/icon.svg
+@@ -0,0 +1,7 @@
++<!-- This Source Code Form is subject to the terms of the Mozilla Public
++   - License, v. 2.0. If a copy of the MPL was not distributed with this
++   - file, You can obtain one at http://mozilla.org/MPL/2.0/. -->
++<svg width="63" height="63" viewBox="0 0 63 63" fill="none" xmlns="http://www.w3.org/2000/svg">
++  <path d="M53.8717 54C66.0976 41.5959 66.0425 21.6295 53.7065 9.29348C41.3705 -3.04253 21.4041 -3.09758 9 9.12833L53.8717 54Z" fill="#23222B"/>
++  <path d="M9.12833 9C-3.09758 21.4041 -3.04253 41.3705 9.29348 53.7065C21.6295 66.0425 41.5959 66.0976 54 53.8717L9.12833 9Z" fill="#F0F0F4"/>
++</svg>
+\ No newline at end of file
+diff --git a/browser/themes/addons/material/manifest.json b/browser/themes/addons/material/manifest.json
+new file mode 100644
+index 0000000000..2c3ab23f7f
+--- /dev/null
++++ b/browser/themes/addons/material/manifest.json
+@@ -0,0 +1,85 @@
++{
++    "manifest_version": 2,
++  
++    "applications": {
++      "gecko": {
++        "id": "floorp-material@mozilla.org"
++      }
++    },
++  
++    "name": "material theme",
++    "description": "Follow the operating system setting for buttons, menus, and windows.",
++    "author": "floorp-projects",
++    "version": "1.0",
++  
++    "icons": {"32": "icon.svg"},
++  
++    "theme": {
++    },
++  
++    "dark_theme": {
++      "colors": {
++        "toolbar": "rgb(53, 54, 58)",
++        "toolbar_text": "rgb(241, 243, 244)",
++        "frame": "rgb(32, 33, 36)",
++        "tab_background_text": "rgb(189, 193, 198)",
++        "toolbar_field": "rgb(32, 33, 36)",
++        "toolbar_field_text": "rgb(241, 243, 244)",
++        "tab_line": "rgb(53, 54, 58)",
++        "popup": "rgb(53, 54, 58)",
++        "popup_text": "rgb(241, 243, 244)",
++        "ntp_background": "rgb(53, 54, 58)",
++        "ntp_text": "rgb(241, 243, 244)",
++        "popup_border": "rgb(53, 54, 58)",
++        "popup_highlight": "rgb(53, 54, 58)",
++        "sidebar_border": "rgb(53, 54, 58)",
++        "sidebar_text": "rgb(241, 243, 244)",
++        "sidebar": "rgb(53, 54, 58)",
++        "tab_background_separator": "rgb(32, 33, 36)",
++        "tab_selected": "rgb(53, 54, 58)",
++        "toolbar_field_border_focus": "rgb(79, 92, 115)",
++        "toolbar_field_highlight": "rgb(24, 90, 188)",
++        "toolbar_field_separator": "rgb(53, 54, 58)",
++        "toolbar_top_separator": "rgb(32, 33, 36)",
++        "toolbar_vertical_separator": "rgb(53, 54, 58)",
++        "tab_loading": "rgb(53, 54, 58)"
++      },
++      "properties": {
++        "panel_hover": "color-mix(in srgb, currentColor 9%, transparent)",
++        "panel_active": "color-mix(in srgb, currentColor 14%, transparent)",
++        "panel_active_darker": "color-mix(in srgb, currentColor 25%, transparent)",
++        "toolbar_field_icon_opacity": "1",
++        "zap_gradient": "linear-gradient(90deg, #9059FF 0%, #FF4AA2 52.08%, #FFBD4F 100%)"
++      }
++    },
++  
++    "theme_experiment": {
++      "colors": {
++        "button": "--button-bgcolor",
++        "button_hover": "--button-hover-bgcolor",
++        "button_active": "--button-active-bgcolor",
++        "button_primary": "--button-primary-bgcolor",
++        "button_primary_hover": "--button-primary-hover-bgcolor",
++        "button_primary_active": "--button-primary-active-bgcolor",
++        "button_primary_color": "--button-primary-color",
++        "error_text_color": "--error-text-color",
++        "input_background": "--input-bgcolor",
++        "input_color": "--input-color",
++        "input_border": "--input-border-color",
++        "input_border_error": "--input-error-border-color",
++        "zoom_controls": "--zoom-controls-bgcolor",
++        "autocomplete_popup_separator": "--autocomplete-popup-separator-color",
++        "appmenu_update_icon_color": "--panel-banner-item-update-supported-bgcolor",
++        "appmenu_info_icon_color": "--panel-banner-item-info-icon-bgcolor",
++        "tab_icon_overlay_stroke": "--tab-icon-overlay-stroke",
++        "tab_icon_overlay_fill": "--tab-icon-overlay-fill"
++      },
++      "properties": {
++        "panel_hover": "--panel-item-hover-bgcolor",
++        "panel_active": "--arrowpanel-dimmed-further",
++        "panel_active_darker": "--panel-item-active-bgcolor",
++        "toolbar_field_icon_opacity": "--urlbar-icon-fill-opacity",
++        "zap_gradient": "--panel-separator-zap-gradient"
++      }
++    }
++  }
+\ No newline at end of file
+diff --git a/browser/themes/addons/material/preview.svg b/browser/themes/addons/material/preview.svg
+new file mode 100644
+index 0000000000..abd80faadb
+--- /dev/null
++++ b/browser/themes/addons/material/preview.svg
+@@ -0,0 +1,21 @@
++<?xml version="1.0" encoding="UTF-8" standalone="no"?>
++<!-- This Source Code Form is subject to the terms of the Mozilla Public
++   - License, v. 2.0. If a copy of the MPL was not distributed with this
++   - file, You can obtain one at http://mozilla.org/MPL/2.0/. -->
++<svg width="552.54767" height="75.16037" viewBox="0 0 672.54767 59.16037" fill="none" version="1.1" id="svg28" sodipodi:docname="material.svg" inkscape:version="1.1.1 (3bf5ae0d25, 2021-09-20)" xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape" xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd" xmlns="http://www.w3.org/2000/svg" xmlns:svg="http://www.w3.org/2000/svg">
++  <defs id="defs32"/>
++  <sodipodi:namedview id="namedview30" pagecolor="#ffffff" bordercolor="#666666" borderopacity="1.0" inkscape:pageshadow="2" inkscape:pageopacity="0.0" inkscape:pagecheckerboard="0" showgrid="false" inkscape:zoom="3.3546509" inkscape:cx="489.32066" inkscape:cy="28.46794" inkscape:window-width="1920" inkscape:window-height="1009" inkscape:window-x="-8" inkscape:window-y="-8" inkscape:window-maximized="1" inkscape:current-layer="svg28"/>
++  <rect width="672.54767" height="59.16037" fill="#1c1b22" id="rect2" x="0" y="0" style="stroke-width:0.797496;fill:#1c1b22;fill-opacity:1"/>
++  <path id="rect4" style="fill:#2b2a33;stroke-width:0.827985" d="M 14.084871,3.8232139 H 183.34827 c 2.37398,0 4.28515,1.141655 4.28515,2.559765 V 28.088485 l 3.38009,3.892145 c 1.09322,1.258803 -5.29126,2.559765 -7.66524,2.559765 H 14.084871 c -2.373973,0 -8.504718,-1.585624 -7.423822,-2.848213 L 9.799721,28.025917 V 6.3829789 c 0,-1.41811 1.911177,-2.559765 4.28515,-2.559765 z" sodipodi:nodetypes="ssscsssscss"/>
++  <rect x="41" y="14.52133" width="121" height="5" rx="2" fill="#fbfbfe" id="rect6"/>
++  <rect x="215.75909" y="14.136581" width="121" height="5" rx="2" fill="#b8b7bb" id="rect8"/>
++  <rect y="30.52133" width="672.24957" height="28.639038" fill="#2b2a33" id="rect10" x="0" style="stroke-width:0.768015"/>
++  <circle cx="24" cy="44.521332" r="6.25" stroke="#fbfbfe" stroke-width="1.5" id="circle12"/>
++  <circle cx="47.864792" cy="44.521332" r="6.25" stroke="#fbfbfe" stroke-width="1.5" id="circle14"/>
++  <line x1="657" y1="50.271332" x2="643" y2="50.271332" stroke="#fbfbfe" stroke-width="1.5" id="line16"/>
++  <line x1="657" y1="44.271332" x2="643" y2="44.271332" stroke="#fbfbfe" stroke-width="1.5" id="line18"/>
++  <line x1="657" y1="38.271332" x2="643" y2="38.271332" stroke="#fbfbfe" stroke-width="1.5" id="line20"/>
++  <path id="rect22" style="fill:#323138;stroke-width:0.961438" d="m 126.84481,32.295959 h 463.21185 c 6.86632,0 12.39408,5.527758 12.39408,12.394076 0,6.866318 -5.52776,12.394075 -12.39408,12.394075 H 126.84481 c -6.86632,0 -12.39407,-5.527757 -12.39407,-12.394075 0,-6.866318 5.52775,-12.394076 12.39407,-12.394076 z"/>
++  <circle cx="129.77463" cy="44.239296" r="6.25" stroke="#ffffff" stroke-width="1.5" id="circle24"/>
++  <rect x="145.32388" y="42.915405" width="308" height="4" rx="2" fill="#ffffff" id="rect26"/>
++</svg>
+\ No newline at end of file
+diff --git a/browser/themes/addons/photon/icon.svg b/browser/themes/addons/photon/icon.svg
+new file mode 100644
+index 0000000000..ecf787db73
+--- /dev/null
++++ b/browser/themes/addons/photon/icon.svg
+@@ -0,0 +1,7 @@
++<!-- This Source Code Form is subject to the terms of the Mozilla Public
++   - License, v. 2.0. If a copy of the MPL was not distributed with this
++   - file, You can obtain one at http://mozilla.org/MPL/2.0/. -->
++<svg width="63" height="63" viewBox="0 0 63 63" fill="none" xmlns="http://www.w3.org/2000/svg">
++  <path d="M53.8717 54C66.0976 41.5959 66.0425 21.6295 53.7065 9.29348C41.3705 -3.04253 21.4041 -3.09758 9 9.12833L53.8717 54Z" fill="#23222B"/>
++  <path d="M9.12833 9C-3.09758 21.4041 -3.04253 41.3705 9.29348 53.7065C21.6295 66.0425 41.5959 66.0976 54 53.8717L9.12833 9Z" fill="#F0F0F4"/>
++</svg>
+diff --git a/browser/themes/addons/photon/manifest.json b/browser/themes/addons/photon/manifest.json
+new file mode 100644
+index 0000000000..e701f2fab7
+--- /dev/null
++++ b/browser/themes/addons/photon/manifest.json
+@@ -0,0 +1,48 @@
++{
++    "manifest_version": 2,
++  
++    "applications": {
++      "gecko": {
++        "id": "floorp-photon@mozilla.org"
++      }
++    },
++  
++    "name": "Firefox Photon Color",
++    "description": "A theme with the operating system color scheme.",
++    "author": "Floorp Projects",
++    "version": "1.0",
++  
++    "icons": {"32": "icon.svg"},
++  
++    "theme": {
++      "colors": {
++        "toolbar": "rgb(255, 255, 255)",
++        "toolbar_text": "rgb(0, 0, 0)",
++        "frame": "rgb(11, 0, 48)",
++        "tab_background_text": "rgb(255, 255, 255)",
++        "toolbar_field": "rgb(230, 230, 230)"
++      }
++    },
++  
++    "dark_theme": {
++      "colors": {
++        "tab_background_text": "rgb(249, 249, 250)",
++        "icons": "rgb(249, 249, 250, 0.7)",
++        "frame": "hsl(240, 5%, 5%)",
++        "popup": "#4a4a4f",
++        "popup_text": "rgb(249, 249, 250)",
++        "popup_border": "#27272b",
++        "tab_line": "#0a84ff",
++        "toolbar": "hsl(240, 1%, 20%)",
++        "toolbar_bottom_separator": "hsl(240, 5%, 5%)",
++        "toolbar_field": "rgb(71, 71, 73)",
++        "toolbar_field_border": "rgba(249, 249, 250, 0.2)",
++        "toolbar_field_text": "rgb(249, 249, 250)",
++        "ntp_background": "#2A2A2E",
++        "ntp_text": "rgb(249, 249, 250)",
++        "sidebar": "#38383D",
++        "sidebar_text": "rgb(249, 249, 250)",
++        "sidebar_border": "rgba(255, 255, 255, 0.1)"
++      }
++    }
++  }
+\ No newline at end of file
+diff --git a/browser/themes/addons/photon/preview.svg b/browser/themes/addons/photon/preview.svg
+new file mode 100644
+index 0000000000..b8b6ef29b2
+--- /dev/null
++++ b/browser/themes/addons/photon/preview.svg
+@@ -0,0 +1,17 @@
++<!-- This Source Code Form is subject to the terms of the Mozilla Public
++   - License, v. 2.0. If a copy of the MPL was not distributed with this
++   - file, You can obtain one at http://mozilla.org/MPL/2.0/. -->
++<svg xmlns="http://www.w3.org/2000/svg" width="664" height="90" fill="#0C0C0D">
++  <path fill="#202340" d="M0 0h664v90H0z"/>
++  <path fill="#F9F9FA" d="M28 35.717V.5L156 0v35.217h508V90H0V35.217z"/>
++  <path fill="#0A84FF" d="M28 0h128v5H28z"/>
++  <rect width="76" height="5" x="54" y="18" fill="#3D3D3D" rx="2.5"/>
++  <rect width="76" height="5" x="182" y="18" fill="#F9F9FA" rx="2.5"/>
++  <rect width="533" height="29" x="82.5" y="47.5" fill="#FFF" stroke="#ADADB3" stroke-opacity=".2" rx="4"/>
++  <rect width="430" height="5" x="96" y="61" rx="2.5"/>
++  <circle cx="27" cy="63" r="7"/>
++  <circle cx="55" cy="63" r="7"/>
++  <rect width="18" height="2.667" x="630" y="54" rx="1.333"/>
++  <rect width="18" height="2.667" x="630" y="60.667" rx="1.333"/>
++  <rect width="18" height="2.667" x="630" y="67" rx="1.333"/>
++</svg>
+-- 
+2.25.1
+

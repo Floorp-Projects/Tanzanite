@@ -1,0 +1,114 @@
+From 71130abeeee47b2523f8e1a0a64ba83df14e18a7 Mon Sep 17 00:00:00 2001
+From: surapunoyousei <ryosukeusuusu@gmail.com>
+Date: Sun, 26 Jun 2022 22:09:12 +0900
+Subject: [PATCH] Add Floorp package manifest & installer
+
+---
+ browser/installer/package-manifest.in        |  2 ++
+ browser/installer/windows/moz.build          |  2 +-
+ browser/installer/windows/nsis/installer.nsi | 13 +++++++++++++
+ browser/installer/windows/nsis/stub.nsi      | 16 +++++++---------
+ 4 files changed, 23 insertions(+), 10 deletions(-)
+
+diff --git a/browser/installer/package-manifest.in b/browser/installer/package-manifest.in
+index 73a41dc25b..c085661734 100644
+--- a/browser/installer/package-manifest.in
++++ b/browser/installer/package-manifest.in
+@@ -281,6 +281,8 @@
+ ; Technically this is an app pref file, but we are keeping it in the original
+ ; gre location for now.
+ @RESPATH@/defaults/pref/channel-prefs.js
++@RESPATH@/distribution/policies.json
++@RESPATH@/autoconfig.js
+ 
+ ; Background tasks-specific preferences.  These are in the GRE
+ ; location since they apply to all tasks at this time.
+diff --git a/browser/installer/windows/moz.build b/browser/installer/windows/moz.build
+index cd49c282ba..c293f1c833 100644
+--- a/browser/installer/windows/moz.build
++++ b/browser/installer/windows/moz.build
+@@ -4,7 +4,7 @@
+ # License, v. 2.0. If a copy of the MPL was not distributed with this
+ # file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ 
+-DEFINES["APP_VERSION"] = CONFIG["MOZ_APP_VERSION"]
++DEFINES["APP_VERSION"] = CONFIG["MOZ_APP_VERSION_DISPLAY"]
+ 
+ DEFINES["MOZ_APP_NAME"] = CONFIG["MOZ_APP_NAME"]
+ DEFINES["MOZ_APP_DISPLAYNAME"] = CONFIG["MOZ_APP_DISPLAYNAME"]
+diff --git a/browser/installer/windows/nsis/installer.nsi b/browser/installer/windows/nsis/installer.nsi
+index 6dc2cbfc54..bbb92b0031 100755
+--- a/browser/installer/windows/nsis/installer.nsi
++++ b/browser/installer/windows/nsis/installer.nsi
+@@ -316,6 +316,19 @@ Section "-InstallStartCleanup"
+   ${If} ${FileExists} "$INSTDIR\defaults\pref\channel-prefs.js"
+     Delete "$INSTDIR\defaults\pref\channel-prefs.js"
+   ${EndIf}
++
++  ${If} ${FileExists} "$INSTDIR\distribution\policies.json"
++    Delete "$INSTDIR\distribution\policies.json"
++  ${EndIf}
++
++  ${If} ${FileExists} "$INSTDIR\autoconfig.js"
++    Delete "$INSTDIR\autoconfig.js"
++  ${EndIf}
++
++  ${If} ${FileExists} "$INSTDIR\distribution"
++    RmDir "$INSTDIR\distribution"
++  ${EndIf}
++
+   ${If} ${FileExists} "$INSTDIR\defaults\pref"
+     RmDir "$INSTDIR\defaults\pref"
+   ${EndIf}
+diff --git a/browser/installer/windows/nsis/stub.nsi b/browser/installer/windows/nsis/stub.nsi
+index 3ad55e17e3..98c200a897 100644
+--- a/browser/installer/windows/nsis/stub.nsi
++++ b/browser/installer/windows/nsis/stub.nsi
+@@ -231,11 +231,11 @@ Var ArchToInstall
+ !undef URLStubDownloadX86
+ !undef URLStubDownloadAMD64
+ !undef URLStubDownloadAArch64
+-!define URLStubDownloadX86 "https://download.mozilla.org/?os=win&lang=${AB_CD}&product=firefox-beta-latest"
+-!define URLStubDownloadAMD64 "https://download.mozilla.org/?os=win64&lang=${AB_CD}&product=firefox-beta-latest"
+-!define URLStubDownloadAArch64 "https://download.mozilla.org/?os=win64-aarch64&lang=${AB_CD}&product=firefox-beta-latest"
++!define URLStubDownloadX86 ""
++!define URLStubDownloadAMD64 "https://github.com/Floorp-Projects/Floorp/releases/latest/download/floorp-${AppVersion}.win64.installer.exe"
++!define URLStubDownloadAArch64 ""
+ !undef URLManualDownload
+-!define URLManualDownload "https://www.mozilla.org/${AB_CD}/firefox/installer-help/?channel=beta&installer_lang=${AB_CD}"
++!define URLManualDownload ""
+ !undef Channel
+ !define Channel "beta"
+ !endif
+@@ -685,7 +685,7 @@ Function createInstall
+   ${EndIf}
+ 
+   ${GetLocalAppDataFolder} $0
+-  ${If} ${FileExists} "$0\Mozilla\Floorp"
++  ${If} ${FileExists} "$0\Ablaze\Floorp"
+     StrCpy $ExistingProfile "1"
+   ${Else}
+     StrCpy $ExistingProfile "0"
+@@ -847,9 +847,7 @@ Function OnDownload
+         ; Use a timer so the UI has a chance to update
+         ${StartTimer} ${InstallIntervalMS} DisplayDownloadError
+       ${Else}
+-        CertCheck::CheckPETrustAndInfoAsync "$PLUGINSDIR\download.exe" \
+-          "${CertNameDownload}" "${CertIssuerDownload}"
+-        ${StartTimer} ${DownloadIntervalMS} OnCertCheck
++        Call LaunchFullInstaller
+       ${EndIf}
+     ${Else}
+       StrCpy $DownloadedBytes "$3"
+@@ -1143,7 +1141,7 @@ Function SendPing
+ 
+ !ifdef STUB_DEBUG
+     MessageBox MB_OK "${BaseURLStubPing} \
+-                      $\nStub URL Version = ${StubURLVersion}${StubURLVersionAppend} \
++                      $\nStub URL Version = ${URLStubDownloadAMD64} \
+                       $\nBuild Channel = ${Channel} \
+                       $\nUpdate Channel = ${UpdateChannel} \
+                       $\nLocale = ${AB_CD} \
+-- 
+2.25.1
+

@@ -1,0 +1,2170 @@
+From 0c4906902f9946a49cd627841432a5c05b14c045 Mon Sep 17 00:00:00 2001
+From: surapunoyousei <ryosukeusuusu@gmail.com>
+Date: Sun, 26 Jun 2022 18:17:02 +0900
+Subject: [PATCH 12/24] add userChromeJS loader
+
+---
+ browser/base/content/userChromejs/READMDE.md  |  16 +
+ .../base/content/userChromejs/chromecss.uc.js | 613 ++++++++++++++++++
+ browser/base/content/userChromejs/jar.mn      |  17 +
+ .../userChromejs/loader/BootstrapLoader.jsm   | 431 ++++++++++++
+ .../userChromejs/loader/RDFDataSource.jsm     | 443 +++++++++++++
+ .../loader/RDFManifestConverter.jsm           | 102 +++
+ .../userChromejs/loader/userChrome.jsm        | 222 +++++++
+ .../content/userChromejs/loader/xPref.jsm     |  94 +++
+ browser/base/content/userChromejs/moz.build   |   5 +
+ .../userChromejs/sidebarautohide.uc.js        | 133 ++++
+ 10 files changed, 2076 insertions(+)
+ create mode 100644 browser/base/content/userChromejs/READMDE.md
+ create mode 100644 browser/base/content/userChromejs/chromecss.uc.js
+ create mode 100644 browser/base/content/userChromejs/jar.mn
+ create mode 100644 browser/base/content/userChromejs/loader/BootstrapLoader.jsm
+ create mode 100644 browser/base/content/userChromejs/loader/RDFDataSource.jsm
+ create mode 100644 browser/base/content/userChromejs/loader/RDFManifestConverter.jsm
+ create mode 100644 browser/base/content/userChromejs/loader/userChrome.jsm
+ create mode 100644 browser/base/content/userChromejs/loader/xPref.jsm
+ create mode 100644 browser/base/content/userChromejs/moz.build
+ create mode 100644 browser/base/content/userChromejs/sidebarautohide.uc.js
+
+diff --git a/browser/base/content/userChromejs/READMDE.md b/browser/base/content/userChromejs/READMDE.md
+new file mode 100644
+index 0000000000..877f9f85eb
+--- /dev/null
++++ b/browser/base/content/userChromejs/READMDE.md
+@@ -0,0 +1,16 @@
++このフォルダには、userChromeJS を Floorp に統合するためのソースコードが含まれています。
++
++ロード系の実装については、browser.js を参照してください
++
++また、この機能の構成には以下のオープンソースソフトウェアの利用が不可欠でした。ありがとうございます。learn more: about:license
++
++https://github.com/xiaoxiaoflood/firefox-scripts
++
++copyright xiaoxiaoflood
++
++LICESNE MPL2.0
++
++browser/base/content/userChromejs/chromecss.uc.js & sidebarautohide.uc.js
++
++LICENSE MIT
++copyright Griever
+\ No newline at end of file
+diff --git a/browser/base/content/userChromejs/chromecss.uc.js b/browser/base/content/userChromejs/chromecss.uc.js
+new file mode 100644
+index 0000000000..92b090ba83
+--- /dev/null
++++ b/browser/base/content/userChromejs/chromecss.uc.js
+@@ -0,0 +1,613 @@
++// ==UserScript==
++// @name           UserCSSLoader
++// @description    Stylish みたいなもの
++// @namespace      http://d.hatena.ne.jp/Griever/
++// @author         Griever
++// @include        main
++// @license        MIT License
++// @compatibility  Firefox 4
++// @charset        UTF-8
++// @version        0.0.4r3
++// @note           0.0.4r3 Fx92: getURLSpecFromFile() -> getURLSpecFromActualFile()
++// @note           0.0.4r2 ファイル名末尾.author.cssでAUTHOR_SHEETで読めるようにした
++// @note           0.0.4 Remove E4X
++// @note           CSSEntry クラスを作った
++// @note           スタイルのテスト機能を作り直した
++// @note           ファイルが削除された場合 rebuild 時に CSS を解除しメニューを消すようにした
++// @note           uc で読み込まれた .uc.css の再読み込みに仮対応
++// ==/UserScript==
++
++/****** 使い方 ******
++
++chrome フォルダに CSS フォルダが作成されるのでそこに .css をぶち込むだけ。
++ファイル名が "xul-" で始まる物、".as.css" で終わる物は AGENT_SHEET で、
++".author.css"で終わるものは AUTHOR_SHEETで、それ以外は USER_SHEET で読み込む。
++ファイルの内容はチェックしないので @namespace 忘れに注意。
++
++メニューバーに CSS メニューが追加される
++メニューを左クリックすると ON/OFF
++          中クリックするとメニューを閉じずに ON/OFF
++          右クリックするとエディタで開く
++
++エディタは "view_source.editor.path" に指定されているものを使う
++フォルダは "UserCSSLoader.FOLDER" にパスを入れれば変更可能
++
++ **** 説明終わり ****/
++
++(function(){
++
++let { classes: Cc, interfaces: Ci, utils: Cu, results: Cr } = Components;
++if (!window.Services)
++	Cu.import("resource://gre/modules/Services.jsm");
++// 起動時に他の窓がある（２窓目の）場合は抜ける
++let list = Services.wm.getEnumerator("navigator:browser");
++while(list.hasMoreElements()){ if(list.getNext() != window) return; }
++
++if (window.UCL) {
++	window.UCL.destroy();
++	delete window.UCL;
++}
++const XULNS = "http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul";
++
++window.UCL = {
++	IN_TOOLMENU	: false,	// true: ツールメニュー内、 false:メインメニューのヘルプの前
++	USE_UC		: "UC" in window,
++	AGENT_SHEET	: Ci.nsIStyleSheetService.AGENT_SHEET,
++	USER_SHEET 	: Ci.nsIStyleSheetService.USER_SHEET,
++	AUTHOR_SHEET: Ci.nsIStyleSheetService.AUTHOR_SHEET,
++	readCSS    	: {},
++	get disabled_list() {
++		let obj = [];
++		try {
++			obj = decodeURIComponent(this.prefs.getCharPref("disabled_list")).split("|");
++		} catch(e) {}
++		delete this.disabled_list;
++		return this.disabled_list = obj;
++	},
++	get prefs() {
++		delete this.prefs;
++		return this.prefs = Services.prefs.getBranch("UserCSSLoader.")
++	},
++	get styleSheetServices(){
++		delete this.styleSheetServices;
++		return this.styleSheetServices = Cc["@mozilla.org/content/style-sheet-service;1"].getService(Ci.nsIStyleSheetService);
++	},
++	get FOLDER() {
++		let aFolder;
++		try {
++			// UserCSSLoader.FOLDER があればそれを使う
++			let folderPath = this.prefs.getCharPref("FOLDER");
++			aFolder = Cc["@mozilla.org/file/local;1"].createInstance(Ci.nsIFile)
++			aFolder.initWithPath(folderPath);
++		} catch (e) {
++			aFolder = Services.dirsvc.get("UChrm", Ci.nsIFile);
++			aFolder.appendRelativePath("CSS");
++		}
++		if (!aFolder.exists() || !aFolder.isDirectory()) {
++			aFolder.create(Ci.nsIFile.DIRECTORY_TYPE, 0664);
++		}
++		delete this.FOLDER;
++		return this.FOLDER = aFolder;
++	},
++	getFocusedWindow: function() {
++		let win = document.commandDispatcher.focusedWindow;
++		if (!win || win == window) win = content;
++		return win;
++	},
++
++
++
++	init: function() {
++		const cssmenu = $C("menu", {
++			id: "usercssloader-menu",
++			label: "CSS",
++			accesskey: "C"
++		});
++		const menupopup = $C("menupopup", {
++			id: "usercssloader-menupopup"
++		});
++		cssmenu.appendChild(menupopup);
++
++		let menu = $C("menu", {
++			label: "メニュー",
++			accesskey: "C"
++		});
++		menupopup.appendChild(menu);
++		let mp = $C("menupopup", { id: "usercssloader-submenupopup" });
++		menu.appendChild(mp);
++		mp.appendChild($C("menuitem", {
++			label: "Rebuld",
++			accesskey: "R",
++			acceltext: "Alt + R",
++			oncommand: "UCL.rebuild();"
++		}));
++		mp.appendChild($C("menuseparator"));
++		mp.appendChild($C("menuitem", {
++			label: "ブラウザー CSS ファイルを作成",
++			accesskey: "N",
++			oncommand: "UCL.create();"
++		}));
++		mp.appendChild($C("menuitem", {
++			label: "CSS フォルダを開く",
++			accesskey: "O",
++			oncommand: "UCL.openFolder();"
++		}));
++		mp.appendChild($C("menuitem", {
++			label: "userChrome.css を編集",
++//			hidden: true,
++			oncommand: "UCL.editUserCSS(\'userChrome.css\');"
++		}));
++		mp.appendChild($C("menuitem", {
++			label: "userContent.css を編集",
++//			hidden: true,
++			oncommand: "UCL.editUserCSS(\'userContent.css\');"
++		}));
++		mp.appendChild($C("menuseparator"));
++		mp.appendChild($C("menuitem", {
++			label: "スタイルのテスト (Chrome)",
++			id: "usercssloader-test-chrome",
++			hidden: true,
++			accesskey: "C",
++			oncommand: "UCL.styleTest(window);"
++		}));
++		mp.appendChild($C("menuitem", {
++			label: "スタイルのテスト (Webページ)",
++			id: "usercssloader-test-content",
++			hidden: true,
++			accesskey: "W",
++			oncommand: "UCL.styleTest();"
++		}));
++		menu = $C("menu", {
++			label: ".uc.css",
++			accesskey: "U",
++			hidden: !UCL.USE_UC
++		});
++		menupopup.appendChild(menu);
++		mp = $C("menupopup", { id: "usercssloader-ucmenupopup" });
++		menu.appendChild(mp);
++		mp.appendChild($C("menuitem", {
++			label: "Rebuild(.uc.js)",
++			oncommand: "UCL.UCrebuild();"
++		}));
++		mp.appendChild($C("menuseparator", { id: "usercssloader-ucsepalator" }));
++
++		if (this.IN_TOOLMENU) {
++			$('menu_ToolsPopup').insertBefore(cssmenu, $('menu_preferences'));
++		} else {
++			$('main-menubar').insertBefore(cssmenu, $('helpMenu'));
++		}
++
++		$("mainKeyset").appendChild($C("key", {
++			id: "usercssloader-rebuild-key",
++			oncommand: "UCL.rebuild();",
++			key: "R",
++			modifiers: "alt",
++		}));
++
++		this.rebuild();
++		this.initialized = true;
++		if (UCL.USE_UC) {
++			setTimeout(function() {
++				UCL.UCcreateMenuitem();
++			}, 1000);
++		}
++		window.addEventListener("unload", this, false);
++	},
++	uninit: function() {
++		const dis = [];
++		for (let x of Object.keys(this.readCSS)) {
++			if (!this.readCSS[x].enabled)
++				dis.push(x);
++		}
++		this.prefs.setCharPref("disabled_list", encodeURIComponent(dis.join("|")));
++		window.removeEventListener("unload", this, false);
++	},
++	destroy: function() {
++		var i = document.getElementById("usercssloader-menu");
++		if (i) i.parentNode.removeChild(i);
++		var i = document.getElementById("usercssloader-rebuild-key");
++		if (i) i.parentNode.removeChild(i);
++		this.uninit();
++	},
++	handleEvent: function(event) {
++		switch(event.type){
++			case "unload": this.uninit(); break;
++		}
++	},
++	rebuild: function() {
++		let ext = /\.css$/i;
++		let not = /\.uc\.css/i;
++		let files = this.FOLDER.directoryEntries.QueryInterface(Ci.nsISimpleEnumerator);
++
++		while (files.hasMoreElements()) {
++			let file = files.getNext().QueryInterface(Ci.nsIFile);
++			if (!ext.test(file.leafName) || not.test(file.leafName)) continue;
++			let CSS = this.loadCSS(file);
++			CSS.flag = true;
++		}
++		for (let leafName of Object.keys(this.readCSS)) {
++			const CSS = this.readCSS[leafName];
++			if (!CSS.flag) {
++				CSS.enabled = false;
++				delete this.readCSS[leafName];
++			}
++			delete CSS.flag;
++			this.rebuildMenu(leafName);
++		}
++		if (this.initialized) {
++			if (typeof(StatusPanel) !== "undefined")
++				StatusPanel._label = "Rebuild しました";
++			else
++				XULBrowserWindow.statusTextField.label = "Rebuild しました";
++		}
++	},
++	loadCSS: function(aFile) {
++		var CSS = this.readCSS[aFile.leafName];
++		if (!CSS) {
++			CSS = this.readCSS[aFile.leafName] = new CSSEntry(aFile);
++			if (this.disabled_list.indexOf(CSS.leafName) === -1) {
++				CSS.enabled = true;
++			}
++		} else if (CSS.enabled) {
++			CSS.enabled = true;
++		}
++		return CSS;
++	},
++	rebuildMenu: function(aLeafName) {
++		var CSS = this.readCSS[aLeafName];
++		var menuitem = document.getElementById("usercssloader-" + aLeafName);
++		if (!CSS) {
++			if (menuitem)
++				menuitem.parentNode.removeChild(menuitem);
++			return;
++		}
++
++		if (!menuitem) {
++			menuitem = $C("menuitem", {
++				label		: aLeafName,
++				id			: "usercssloader-" + aLeafName,
++				class		: "usercssloader-item " + (CSS.SHEET == this.AGENT_SHEET? "AGENT_SHEET" : CSS.SHEET == this.AUTHOR_SHEET? "AUTHOR_SHEET": "USER_SHEET"),
++				type		: "checkbox",
++				autocheck	: "false",
++				oncommand	: "UCL.toggle('"+ aLeafName +"');",
++				onclick		: "UCL.itemClick(event);"
++			});
++			document.getElementById("usercssloader-menupopup").appendChild(menuitem);
++		}
++		menuitem.setAttribute("checked", CSS.enabled);
++	},
++	toggle: function(aLeafName) {
++		var CSS = this.readCSS[aLeafName];
++		if (!CSS) return;
++		CSS.enabled = !CSS.enabled;
++		this.rebuildMenu(aLeafName);
++	},
++	itemClick: function(event) {
++		if (event.button == 0) return;
++
++		event.preventDefault();
++		event.stopPropagation();
++		let label = event.currentTarget.getAttribute("label");
++
++		if (event.button == 1) {
++			this.toggle(label);
++		}
++		else if (event.button == 2) {
++			closeMenus(event.target);
++			this.edit(this.getFileFromLeafName(label));
++		}
++	},
++	getFileFromLeafName: function(aLeafName) {
++		let f = this.FOLDER.clone();
++		f.QueryInterface(Ci.nsIFile); // use appendRelativePath
++		f.appendRelativePath(aLeafName);
++		return f;
++	},
++	styleTest: function(aWindow) {
++		aWindow || (aWindow = this.getFocusedWindow());
++		new CSSTester(aWindow, function(tester){
++			if (tester.saved)
++				UCL.rebuild();
++		});
++	},
++	searchStyle: function() {
++		window.open("https://userstyles.org/styles/search/");
++	},
++	howtouse: function() {
++		window.open("https://blog.ablaze.one/wp-admin/post.php?post=1816&action=edit");
++	},
++	openFolder: function() {
++		this.FOLDER.launch();
++	},
++	editUserCSS: function(aLeafName) {
++		let file = Services.dirsvc.get("UChrm", Ci.nsIFile);
++		file.appendRelativePath(aLeafName);
++		this.edit(file);
++	},
++	edit: function(aFile) {
++		var editor = Services.prefs.getCharPref("view_source.editor.path");
++		if (!editor) return alert("この操作にはエディタのパスが必要です。about:config で\n view_source.editor.path を設定してください");
++		try {
++			var UI = Cc["@mozilla.org/intl/scriptableunicodeconverter"].createInstance(Ci.nsIScriptableUnicodeConverter);
++			UI.charset = window.navigator.platform.toLowerCase().indexOf("win") >= 0? "Shift_JIS": "UTF-8";
++			var path = UI.ConvertFromUnicode(aFile.path);
++			var app = Cc["@mozilla.org/file/local;1"].createInstance(Ci.nsIFile);
++			app.initWithPath(editor);
++			var process = Cc["@mozilla.org/process/util;1"].createInstance(Ci.nsIProcess);
++			process.init(app);
++			process.run(false, [path], 1);
++		} catch (e) {}
++	},
++	create: function(aLeafName) {
++		if (!aLeafName) aLeafName = prompt("ファイル名を入力してください", dateFormat(new Date(), "%Y_%m%d_%H%M%S"));
++		if (aLeafName) aLeafName = aLeafName.replace(/\s+/g, " ").replace(/[\\/:*?\"<>|]/g, "");
++		if (!aLeafName || !/\S/.test(aLeafName)) return;
++		if (!/\.css$/.test(aLeafName)) aLeafName += ".css";
++		let file = this.getFileFromLeafName(aLeafName);
++		this.edit(file);
++	},
++	UCrebuild: function() {
++		let re = /^file:.*\.uc\.css(?:\?\d+)?$/i;
++		let query = "?" + new Date().getTime();
++		Array.slice(document.styleSheets).forEach(function(css){
++			if (!re.test(css.href)) return;
++			if (css.ownerNode) {
++				css.ownerNode.parentNode.removeChild(css.ownerNode);
++			}
++			let pi = document.createProcessingInstruction('xml-stylesheet','type="text/css" href="'+ css.href.replace(/\?.*/, '') + query +'"');
++			document.insertBefore(pi, document.documentElement);
++		});
++		UCL.UCcreateMenuitem();
++	},
++	UCcreateMenuitem: function() {
++		let sep = $("usercssloader-ucsepalator");
++		let popup = sep.parentNode;
++		if (sep.nextSibling) {
++			let range = document.createRange();
++			range.setStartAfter(sep);
++			range.setEndAfter(popup.lastChild);
++			range.deleteContents();
++			range.detach();
++		}
++
++		let re = /^file:.*\.uc\.css(?:\?\d+)?$/i;
++		Array.slice(document.styleSheets).forEach(function(css) {
++			if (!re.test(css.href)) return;
++			let fileURL = decodeURIComponent(css.href).split("?")[0];
++			let aLeafName = fileURL.split("/").pop();
++			let m = $C("menuitem", {
++				label		: aLeafName,
++				tooltiptext	: fileURL,
++				id			: "usercssloader-" + aLeafName,
++				type		: "checkbox",
++				autocheck	: "false",
++				checked		: "true",
++				oncommand	: "this.setAttribute('checked', !(this.css.disabled = !this.css.disabled));",
++				onclick		: "UCL.UCItemClick(event);"
++			});
++			m.css = css;
++			popup.appendChild(m);
++		});
++	},
++	UCItemClick: function(event) {
++		if (event.button == 0) return;
++		event.preventDefault();
++		event.stopPropagation();
++
++		if (event.button == 1) {
++			event.target.doCommand();
++		}
++		else if (event.button == 2) {
++			closeMenus(event.target);
++			let fileURL = event.currentTarget.getAttribute("tooltiptext");
++			let file = Services.io.getProtocolHandler("file").QueryInterface(Ci.nsIFileProtocolHandler).getFileFromURLSpec(fileURL);
++			this.edit(file);
++		}
++	},
++};
++
++function CSSEntry(aFile) {
++	this.path = aFile.path;
++	this.leafName = aFile.leafName;
++	this.lastModifiedTime = 1;
++	this.SHEET = /^xul-|\.as\.css$/i.test(this.leafName) ?
++		Ci.nsIStyleSheetService.AGENT_SHEET:
++		/\.author\.css$/i.test(this.leafName)?
++			Ci.nsIStyleSheetService.AUTHOR_SHEET:
++			Ci.nsIStyleSheetService.USER_SHEET;
++}
++CSSEntry.prototype = {
++	sss: Cc["@mozilla.org/content/style-sheet-service;1"].getService(Ci.nsIStyleSheetService),
++	_enabled: false,
++	get enabled() {
++		return this._enabled;
++	},
++	set enabled(isEnable) {
++		var aFile = Cc["@mozilla.org/file/local;1"].createInstance(Ci.nsIFile)
++		aFile.initWithPath(this.path);
++
++		var isExists = aFile.exists(); // ファイルが存在したら true
++		var lastModifiedTime = isExists ? aFile.lastModifiedTime : 0;
++		var isForced = this.lastModifiedTime != lastModifiedTime; // ファイルに変更があれば true
++
++		var fileURL = Services.io.getProtocolHandler("file").QueryInterface(Ci.nsIFileProtocolHandler).getURLSpecFromActualFile(aFile);
++		var uri = Services.io.newURI(fileURL, null, null);
++
++		if (this.sss.sheetRegistered(uri, this.SHEET)) {
++			// すでにこのファイルが読み込まれている場合
++			if (!isEnable || !isExists) {
++				this.sss.unregisterSheet(uri, this.SHEET);
++			}
++			else if (isForced) {
++				// 解除後に登録し直す
++				this.sss.unregisterSheet(uri, this.SHEET);
++				this.sss.loadAndRegisterSheet(uri, this.SHEET);
++			}
++		} else {
++			// このファイルは読み込まれていない
++			if (isEnable && isExists) {
++				this.sss.loadAndRegisterSheet(uri, this.SHEET);
++			}
++		}
++		if (this.lastModifiedTime !== 1 && isEnable && isForced) {
++			log(this.leafName + " の更新を確認しました。");
++		}
++		this.lastModifiedTime = lastModifiedTime;
++		return this._enabled = isEnable;
++	},
++};
++
++function CSSTester(aWindow, aCallback) {
++	this.win = aWindow || window;
++	this.doc = this.win.document;
++	this.callback = aCallback;
++	this.init();
++}
++CSSTester.prototype = {
++	sss: Cc["@mozilla.org/content/style-sheet-service;1"].getService(Ci.nsIStyleSheetService),
++	preview_code: "",
++	saved: false,
++	init: function() {
++		this.dialog = openDialog(
++			"data:text/html;charset=utf8,"+encodeURIComponent('<!DOCTYPE HTML><html lang="ja"><head><title>CSSTester</title></head><body></body></html>'),
++			"",
++			"width=550,height=400,dialog=no");
++		this.dialog.addEventListener("load", this, false);
++	},
++	destroy: function() {
++		this.preview_end();
++		this.dialog.removeEventListener("unload", this, false);
++		this.previewButton.removeEventListener("click", this, false);
++		this.saveButton.removeEventListener("click", this, false);
++		this.closeButton.removeEventListener("click", this, false);
++	},
++	handleEvent: function(event) {
++		switch(event.type) {
++			case "click":
++				if (event.button != 0) return;
++				if (this.previewButton == event.currentTarget) {
++					this.preview();
++				}
++				else if (this.saveButton == event.currentTarget) {
++					this.save();
++				}
++				else if (this.closeButton == event.currentTarget) {
++					this.dialog.close();
++				}
++				break;
++			case "load":
++				var doc = this.dialog.document;
++				doc.body.innerHTML = '\
++					<style type="text/css">\
++						:not(input):not(select) { padding: 0px; margin: 0px; }\
++						table { border-spacing: 0px; }\
++						body, html, #main, #textarea { width: 100%; height: 100%; }\
++						#textarea { font-family: monospace; }\
++					</style>\
++					<table id="main">\
++						<tr height="100%">\
++							<td colspan="4"><textarea id="textarea"></textarea></td>\
++						</tr>\
++						<tr height="40">\
++							<td><input type="button" value="Preview" /></td>\
++							<td><input type="button" value="Save" /></td>\
++							<td width="80%"><span class="log"></span></td>\
++							<td><input type="button" value="Close" /></td>\
++						</tr>\
++					</table>\
++				';
++				this.textbox = doc.querySelector("textarea");
++				this.previewButton = doc.querySelector('input[value="Preview"]');
++				this.saveButton = doc.querySelector('input[value="Save"]');
++				this.closeButton = doc.querySelector('input[value="Close"]');
++				this.logField = doc.querySelector('.log');
++
++				var code = "@namespace url(" + this.doc.documentElement.namespaceURI + ");\n";
++				code += this.win.location.protocol.indexOf("http") === 0?
++					"@-moz-document domain(" + this.win.location.host + ") {\n\n\n\n}":
++					"@-moz-document url(" + this.win.location.href + ") {\n\n\n\n}";
++				this.textbox.value = code;
++				this.dialog.addEventListener("unload", this, false);
++				this.previewButton.addEventListener("click", this, false);
++				this.saveButton.addEventListener("click", this, false);
++				this.closeButton.addEventListener("click", this, false);
++
++				this.textbox.focus();
++				let p = this.textbox.value.length - 3;
++				this.textbox.setSelectionRange(p, p);
++
++				break;
++			case "unload":
++				this.destroy();
++				this.callback(this);
++				break;
++		}
++	},
++	preview: function() {
++		var code = this.textbox.value;
++		if (!code || !/\:/.test(code))
++			return;
++		code = "data:text/css;charset=utf-8," + encodeURIComponent(this.textbox.value);
++		if (code == this.preview_code)
++			return;
++		this.preview_end();
++		var uri = Services.io.newURI(code, null, null);
++		this.sss.loadAndRegisterSheet(uri, Ci.nsIStyleSheetService.AGENT_SHEET);
++		this.preview_code = code;
++		this.log("Preview");
++	},
++	preview_end: function() {
++		if (this.preview_code) {
++			let uri = Services.io.newURI(this.preview_code, null, null);
++			this.sss.unregisterSheet(uri, Ci.nsIStyleSheetService.AGENT_SHEET);
++			this.preview_code = "";
++		}
++	},
++	save: function() {
++		var data = this.textbox.value;
++		if (!data) return;
++
++		var fp = Cc["@mozilla.org/filepicker;1"].createInstance(Ci.nsIFilePicker);
++		fp.init(window, "", Ci.nsIFilePicker.modeSave);
++		fp.appendFilter("CSS Files","*.css");
++		fp.defaultExtension = "css";
++		if (window.UCL)
++			fp.displayDirectory = UCL.FOLDER;
++		var res = fp.show();
++		if (res != fp.returnOK && res != fp.returnReplace) return;
++
++		var suConverter = Cc["@mozilla.org/intl/scriptableunicodeconverter"].createInstance(Ci.nsIScriptableUnicodeConverter);
++		suConverter.charset = "UTF-8";
++		data = suConverter.ConvertFromUnicode(data);
++		var foStream = Cc["@mozilla.org/network/file-output-stream;1"].createInstance(Ci.nsIFileOutputStream);
++		foStream.init(fp.file, 0x02 | 0x08 | 0x20, 0664, 0);
++		foStream.write(data, data.length);
++		foStream.close();
++		this.saved = true;
++	},
++	log: function() {
++		this.logField.textContent = dateFormat(new Date(), "%H:%M:%S") + ": " + $A(arguments);
++	}
++};
++
++UCL.init();
++
++function $(id) { return document.getElementById(id); }
++function $A(arr) { return Array.slice(arr); }
++function $C(name, attr) {
++	const el = document.createElementNS(XULNS, name);
++	if (attr) Object.keys(attr).forEach(function(n) { el.setAttribute(n, attr[n]) });
++	return el;
++}
++function dateFormat(date, format) {
++	format = format.replace("%Y", ("000" + date.getFullYear()).substr(-4));
++	format = format.replace("%m", ("0" + (date.getMonth()+1)).substr(-2));
++	format = format.replace("%d", ("0" + date.getDate()).substr(-2));
++	format = format.replace("%H", ("0" + date.getHours()).substr(-2));
++	format = format.replace("%M", ("0" + date.getMinutes()).substr(-2));
++	format = format.replace("%S", ("0" + date.getSeconds()).substr(-2));
++	return format;
++}
++
++function log(mes) { console.log(mes); }
++})();
+diff --git a/browser/base/content/userChromejs/jar.mn b/browser/base/content/userChromejs/jar.mn
+new file mode 100644
+index 0000000000..c5014abacc
+--- /dev/null
++++ b/browser/base/content/userChromejs/jar.mn
+@@ -0,0 +1,17 @@
++# This Source Code Form is subject to the terms of the Mozilla Public
++# License, v. 2.0. If a copy of the MPL was not distributed with this
++# file, You can obtain one at http://mozilla.org/MPL/2.0/.
++
++browser.jar:
++% content userchromejs %content/userchromejs/ contentaccessible=yes
++
++# userScript
++   content/userchromejs/chromecss.uc.js             (chromecss.uc.js)
++   content/userchromejs/sidebarautohide.uc.js       (sidebarautohide.uc.js)
++
++# Loader
++   content/userchromejs/BootstrapLoader.jsm         (loader/BootstrapLoader.jsm)
++   content/userchromejs/RDFDataSource.jsm           (loader/RDFDataSource.jsm)
++   content/userchromejs/RDFManifestConverter.jsm    (loader/RDFManifestConverter.jsm)
++   content/userchromejs/userChrome.jsm              (loader/userChrome.jsm)
++   content/userchromejs/xPref.jsm                   (loader/xPref.jsm)
+diff --git a/browser/base/content/userChromejs/loader/BootstrapLoader.jsm b/browser/base/content/userChromejs/loader/BootstrapLoader.jsm
+new file mode 100644
+index 0000000000..80d10ab962
+--- /dev/null
++++ b/browser/base/content/userChromejs/loader/BootstrapLoader.jsm
+@@ -0,0 +1,431 @@
++/* This Source Code Form is subject to the terms of the Mozilla Public
++ * License, v. 2.0. If a copy of the MPL was not distributed with this
++ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
++
++'use strict';
++
++let EXPORTED_SYMBOLS = [];
++
++const { XPCOMUtils } = ChromeUtils.import('resource://gre/modules/XPCOMUtils.jsm');
++
++XPCOMUtils.defineLazyModuleGetters(this, {
++  Blocklist: 'resource://gre/modules/Blocklist.jsm',
++  ConsoleAPI: 'resource://gre/modules/Console.jsm',
++  InstallRDF: 'chrome://userchromejs/content/RDFManifestConverter.jsm',
++  Services: 'resource://gre/modules/Services.jsm',
++});
++
++Services.obs.addObserver(doc => {
++  if (doc.location.protocol + doc.location.pathname === 'about:addons' ||
++      doc.location.protocol + doc.location.pathname === 'chrome:/content/extensions/aboutaddons.html') {
++    const win = doc.defaultView;
++    let handleEvent_orig = win.customElements.get('addon-card').prototype.handleEvent;
++    win.customElements.get('addon-card').prototype.handleEvent = function (e) {
++      if (e.type === 'click' &&
++          e.target.getAttribute('action') === 'preferences' &&
++          this.addon.optionsType == 1/*AddonManager.OPTIONS_TYPE_DIALOG*/) {
++        var windows = Services.wm.getEnumerator(null);
++        while (windows.hasMoreElements()) {
++          var win2 = windows.getNext();
++          if (win2.closed) {
++            continue;
++          }
++          if (win2.document.documentURI == this.addon.optionsURL) {
++            win2.focus();
++            return;
++          }
++        }
++        var features = 'chrome,titlebar,toolbar,centerscreen';
++        var instantApply = Services.prefs.getBoolPref('browser.preferences.instantApply');
++        features += instantApply ? ',dialog=no' : '';
++        win.docShell.rootTreeItem.domWindow.openDialog(this.addon.optionsURL, this.addon.id, features);
++      } else {
++        handleEvent_orig.apply(this, arguments);
++      }
++    }
++    let update_orig = win.customElements.get('addon-options').prototype.update;
++    win.customElements.get('addon-options').prototype.update = function (card, addon) {
++      update_orig.apply(this, arguments);
++      if (addon.optionsType == 1/*AddonManager.OPTIONS_TYPE_DIALOG*/)
++        this.querySelector('panel-item[data-l10n-id="preferences-addon-button"]').hidden = false;
++    }
++  }
++}, 'chrome-document-loaded');
++
++const {AddonManager} = ChromeUtils.import('resource://gre/modules/AddonManager.jsm');
++const {XPIDatabase, AddonInternal} = ChromeUtils.import('resource://gre/modules/addons/XPIDatabase.jsm');
++
++const { defineAddonWrapperProperty } = Cu.import('resource://gre/modules/addons/XPIDatabase.jsm');
++defineAddonWrapperProperty('optionsType', function optionsType() {
++  if (!this.isActive) {
++    return null;
++  }
++
++  let addon = this.__AddonInternal__;
++  let hasOptionsURL = !!this.optionsURL;
++
++  if (addon.optionsType) {
++    switch (parseInt(addon.optionsType, 10)) {
++      case 1/*AddonManager.OPTIONS_TYPE_DIALOG*/:
++      case AddonManager.OPTIONS_TYPE_TAB:
++      case AddonManager.OPTIONS_TYPE_INLINE_BROWSER:
++        return hasOptionsURL ? addon.optionsType : null;
++    }
++    return null;
++  }
++
++  return null;
++});
++
++XPIDatabase.isDisabledLegacy = () => false;
++
++XPCOMUtils.defineLazyGetter(this, 'BOOTSTRAP_REASONS', () => {
++  const {XPIProvider} = ChromeUtils.import('resource://gre/modules/addons/XPIProvider.jsm');
++  return XPIProvider.BOOTSTRAP_REASONS;
++});
++
++const {Log} = ChromeUtils.import('resource://gre/modules/Log.jsm');
++var logger = Log.repository.getLogger('addons.bootstrap');
++
++/**
++ * Valid IDs fit this pattern.
++ */
++var gIDTest = /^(\{[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\}|[a-z0-9-\._]*\@[a-z0-9-\._]+)$/i;
++
++// Properties that exist in the install manifest
++const PROP_METADATA      = ['id', 'version', 'type', 'internalName', 'updateURL',
++                            'optionsURL', 'optionsType', 'aboutURL', 'iconURL'];
++const PROP_LOCALE_SINGLE = ['name', 'description', 'creator', 'homepageURL'];
++const PROP_LOCALE_MULTI  = ['developers', 'translators', 'contributors'];
++
++// Map new string type identifiers to old style nsIUpdateItem types.
++// Retired values:
++// 32 = multipackage xpi file
++// 8 = locale
++// 256 = apiextension
++// 128 = experiment
++// theme = 4
++const TYPES = {
++  extension: 2,
++  dictionary: 64,
++};
++
++const COMPATIBLE_BY_DEFAULT_TYPES = {
++  extension: true,
++  dictionary: true,
++};
++
++const hasOwnProperty = Function.call.bind(Object.prototype.hasOwnProperty);
++
++function isXPI(filename) {
++  let ext = filename.slice(-4).toLowerCase();
++  return ext === '.xpi' || ext === '.zip';
++}
++
++/**
++ * Gets an nsIURI for a file within another file, either a directory or an XPI
++ * file. If aFile is a directory then this will return a file: URI, if it is an
++ * XPI file then it will return a jar: URI.
++ *
++ * @param {nsIFile} aFile
++ *        The file containing the resources, must be either a directory or an
++ *        XPI file
++ * @param {string} aPath
++ *        The path to find the resource at, '/' separated. If aPath is empty
++ *        then the uri to the root of the contained files will be returned
++ * @returns {nsIURI}
++ *        An nsIURI pointing at the resource
++ */
++function getURIForResourceInFile(aFile, aPath) {
++  if (!isXPI(aFile.leafName)) {
++    let resource = aFile.clone();
++    if (aPath)
++      aPath.split('/').forEach(part => resource.append(part));
++
++    return Services.io.newFileURI(resource);
++  }
++
++  return buildJarURI(aFile, aPath);
++}
++
++/**
++ * Creates a jar: URI for a file inside a ZIP file.
++ *
++ * @param {nsIFile} aJarfile
++ *        The ZIP file as an nsIFile
++ * @param {string} aPath
++ *        The path inside the ZIP file
++ * @returns {nsIURI}
++ *        An nsIURI for the file
++ */
++function buildJarURI(aJarfile, aPath) {
++  let uri = Services.io.newFileURI(aJarfile);
++  uri = 'jar:' + uri.spec + '!/' + aPath;
++  return Services.io.newURI(uri);
++}
++
++var BootstrapLoader = {
++  name: 'bootstrap',
++  manifestFile: 'install.rdf',
++  async loadManifest(pkg) {
++    /**
++     * Reads locale properties from either the main install manifest root or
++     * an em:localized section in the install manifest.
++     *
++     * @param {Object} aSource
++     *        The resource to read the properties from.
++     * @param {boolean} isDefault
++     *        True if the locale is to be read from the main install manifest
++     *        root
++     * @param {string[]} aSeenLocales
++     *        An array of locale names already seen for this install manifest.
++     *        Any locale names seen as a part of this function will be added to
++     *        this array
++     * @returns {Object}
++     *        an object containing the locale properties
++     */
++    function readLocale(aSource, isDefault, aSeenLocales) {
++      let locale = {};
++      if (!isDefault) {
++        locale.locales = [];
++        for (let localeName of aSource.locales || []) {
++          if (!localeName) {
++            logger.warn('Ignoring empty locale in localized properties');
++            continue;
++          }
++          if (aSeenLocales.includes(localeName)) {
++            logger.warn('Ignoring duplicate locale in localized properties');
++            continue;
++          }
++          aSeenLocales.push(localeName);
++          locale.locales.push(localeName);
++        }
++
++        if (locale.locales.length == 0) {
++          logger.warn('Ignoring localized properties with no listed locales');
++          return null;
++        }
++      }
++
++      for (let prop of [...PROP_LOCALE_SINGLE, ...PROP_LOCALE_MULTI]) {
++        if (hasOwnProperty(aSource, prop)) {
++          locale[prop] = aSource[prop];
++        }
++      }
++
++      return locale;
++    }
++
++    let manifestData = await pkg.readString('install.rdf');
++    let manifest = InstallRDF.loadFromString(manifestData).decode();
++
++    let addon = new AddonInternal();
++    for (let prop of PROP_METADATA) {
++      if (hasOwnProperty(manifest, prop)) {
++        addon[prop] = manifest[prop];
++      }
++    }
++
++    if (!addon.type) {
++      addon.type = 'extension';
++    } else {
++      let type = addon.type;
++      addon.type = null;
++      for (let name in TYPES) {
++        if (TYPES[name] == type) {
++          addon.type = name;
++          break;
++        }
++      }
++    }
++
++    if (!(addon.type in TYPES))
++      throw new Error('Install manifest specifies unknown type: ' + addon.type);
++
++    if (!addon.id)
++      throw new Error('No ID in install manifest');
++    if (!gIDTest.test(addon.id))
++      throw new Error('Illegal add-on ID ' + addon.id);
++    if (!addon.version)
++      throw new Error('No version in install manifest');
++
++    addon.strictCompatibility = (!(addon.type in COMPATIBLE_BY_DEFAULT_TYPES) ||
++                                 manifest.strictCompatibility == 'true');
++
++    // Only read these properties for extensions.
++    if (addon.type == 'extension') {
++      if (manifest.bootstrap != 'true') {
++        throw new Error('Non-restartless extensions no longer supported');
++      }
++
++      if (addon.optionsType &&
++          addon.optionsType != 1/*AddonManager.OPTIONS_TYPE_DIALOG*/ &&
++          addon.optionsType != AddonManager.OPTIONS_TYPE_INLINE_BROWSER &&
++          addon.optionsType != AddonManager.OPTIONS_TYPE_TAB) {
++            throw new Error('Install manifest specifies unknown optionsType: ' + addon.optionsType);
++      }
++
++      if (addon.optionsType)
++        addon.optionsType = parseInt(addon.optionsType);
++    }
++
++    addon.defaultLocale = readLocale(manifest, true);
++
++    let seenLocales = [];
++    addon.locales = [];
++    for (let localeData of manifest.localized || []) {
++      let locale = readLocale(localeData, false, seenLocales);
++      if (locale)
++        addon.locales.push(locale);
++    }
++
++    let dependencies = new Set(manifest.dependencies);
++    addon.dependencies = Object.freeze(Array.from(dependencies));
++
++    let seenApplications = [];
++    addon.targetApplications = [];
++    for (let targetApp of manifest.targetApplications || []) {
++      if (!targetApp.id || !targetApp.minVersion ||
++          !targetApp.maxVersion) {
++            logger.warn('Ignoring invalid targetApplication entry in install manifest');
++            continue;
++      }
++      if (seenApplications.includes(targetApp.id)) {
++        logger.warn('Ignoring duplicate targetApplication entry for ' + targetApp.id +
++                    ' in install manifest');
++        continue;
++      }
++      seenApplications.push(targetApp.id);
++      addon.targetApplications.push(targetApp);
++    }
++
++    // Note that we don't need to check for duplicate targetPlatform entries since
++    // the RDF service coalesces them for us.
++    addon.targetPlatforms = [];
++    for (let targetPlatform of manifest.targetPlatforms || []) {
++      let platform = {
++        os: null,
++        abi: null,
++      };
++
++      let pos = targetPlatform.indexOf('_');
++      if (pos != -1) {
++        platform.os = targetPlatform.substring(0, pos);
++        platform.abi = targetPlatform.substring(pos + 1);
++      } else {
++        platform.os = targetPlatform;
++      }
++
++      addon.targetPlatforms.push(platform);
++    }
++
++    addon.userDisabled = false;
++    addon.softDisabled = addon.blocklistState == Blocklist.STATE_SOFTBLOCKED;
++    addon.applyBackgroundUpdates = AddonManager.AUTOUPDATE_DEFAULT;
++
++    addon.userPermissions = null;
++
++    addon.icons = {};
++    if (await pkg.hasResource('icon.png')) {
++      addon.icons[32] = 'icon.png';
++      addon.icons[48] = 'icon.png';
++    }
++
++    if (await pkg.hasResource('icon64.png')) {
++      addon.icons[64] = 'icon64.png';
++    }
++
++    return addon;
++  },
++
++  loadScope(addon) {
++    let file = addon.file || addon._sourceBundle;
++    let uri = getURIForResourceInFile(file, 'bootstrap.js').spec;
++    let principal = Services.scriptSecurityManager.getSystemPrincipal();
++
++    let sandbox = new Cu.Sandbox(principal, {
++      sandboxName: uri,
++      addonId: addon.id,
++      wantGlobalProperties: ['ChromeUtils'],
++      metadata: { addonID: addon.id, URI: uri },
++    });
++
++    try {
++      Object.assign(sandbox, BOOTSTRAP_REASONS);
++
++      XPCOMUtils.defineLazyGetter(sandbox, 'console', () =>
++        new ConsoleAPI({ consoleID: `addon/${addon.id}` }));
++
++      Services.scriptloader.loadSubScript(uri, sandbox);
++    } catch (e) {
++      logger.warn(`Error loading bootstrap.js for ${addon.id}`, e);
++    }
++
++    function findMethod(name) {
++      if (sandbox[name]) {
++        return sandbox[name];
++      }
++
++      try {
++        let method = Cu.evalInSandbox(name, sandbox);
++        return method;
++      } catch (err) { }
++
++      return () => {
++        logger.warn(`Add-on ${addon.id} is missing bootstrap method ${name}`);
++      };
++    }
++
++    let install = findMethod('install');
++    let uninstall = findMethod('uninstall');
++    let startup = findMethod('startup');
++    let shutdown = findMethod('shutdown');
++
++    return {
++      install(...args) {
++        install(...args);
++        // Forget any cached files we might've had from this extension.
++        Services.obs.notifyObservers(null, 'startupcache-invalidate');
++      },
++
++      uninstall(...args) {
++        uninstall(...args);
++        // Forget any cached files we might've had from this extension.
++        Services.obs.notifyObservers(null, 'startupcache-invalidate');
++      },
++
++      startup(...args) {
++        if (addon.type == 'extension') {
++          logger.debug(`Registering manifest for ${file.path}\n`);
++          Components.manager.addBootstrappedManifestLocation(file);
++        }
++        return startup(...args);
++      },
++
++      shutdown(data, reason) {
++        try {
++          return shutdown(data, reason);
++        } catch (err) {
++          throw err;
++        } finally {
++          if (reason != BOOTSTRAP_REASONS.APP_SHUTDOWN) {
++            logger.debug(`Removing manifest for ${file.path}\n`);
++            Components.manager.removeBootstrappedManifestLocation(file);
++          }
++        }
++      },
++    };
++  },
++};
++
++AddonManager.addExternalExtensionLoader(BootstrapLoader);
++
++if (AddonManager.isReady) {
++  AddonManager.getAllAddons().then(addons => {
++    addons.forEach(addon => {
++      if (addon.type == 'extension' && !addon.isWebExtension && !addon.userDisabled) {
++        addon.reload();
++      };
++    });
++  });
++}
+\ No newline at end of file
+diff --git a/browser/base/content/userChromejs/loader/RDFDataSource.jsm b/browser/base/content/userChromejs/loader/RDFDataSource.jsm
+new file mode 100644
+index 0000000000..02dc0ce800
+--- /dev/null
++++ b/browser/base/content/userChromejs/loader/RDFDataSource.jsm
+@@ -0,0 +1,443 @@
++ /* This Source Code Form is subject to the terms of the Mozilla Public
++ * License, v. 2.0. If a copy of the MPL was not distributed with this
++ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
++
++/**
++ * This module creates a new API for accessing and modifying RDF graphs. The
++ * goal is to be able to serialise the graph in a human readable form. Also
++ * if the graph was originally loaded from an RDF/XML the serialisation should
++ * closely match the original with any new data closely following the existing
++ * layout. The output should always be compatible with Mozilla's RDF parser.
++ *
++ * This is all achieved by using a DOM Document to hold the current state of the
++ * graph in XML form. This can be initially loaded and parsed from disk or
++ * a blank document used for an empty graph. As assertions are added to the
++ * graph, appropriate DOM nodes are added to the document to represent them
++ * along with any necessary whitespace to properly layout the XML.
++ *
++ * In general the order of adding assertions to the graph will impact the form
++ * the serialisation takes. If a resource is first added as the object of an
++ * assertion then it will eventually be serialised inside the assertion's
++ * property element. If a resource is first added as the subject of an assertion
++ * then it will be serialised at the top level of the XML.
++ */
++
++const NS_XML = "http://www.w3.org/XML/1998/namespace";
++const NS_XMLNS = "http://www.w3.org/2000/xmlns/";
++const NS_RDF = "http://www.w3.org/1999/02/22-rdf-syntax-ns#";
++const NS_NC = "http://home.netscape.com/NC-rdf#";
++
++/* eslint prefer-template: 1 */
++
++var EXPORTED_SYMBOLS = ["RDFLiteral", "RDFBlankNode", "RDFResource", "RDFDataSource"];
++
++const {XPCOMUtils} = ChromeUtils.import("resource://gre/modules/XPCOMUtils.jsm");
++
++XPCOMUtils.defineLazyGlobalGetters(this, ["DOMParser", "Element", "fetch"]);
++
++ChromeUtils.defineModuleGetter(this, "Services",
++                               "resource://gre/modules/Services.jsm");
++
++function isElement(obj) {
++  return Element.isInstance(obj);
++}
++function isText(obj) {
++  return obj && typeof obj == "object" && ChromeUtils.getClassName(obj) == "Text";
++}
++
++/**
++ * Returns either an rdf namespaced attribute or an un-namespaced attribute
++ * value. Returns null if neither exists,
++ */
++function getRDFAttribute(element, name) {
++  if (element.hasAttributeNS(NS_RDF, name))
++    return element.getAttributeNS(NS_RDF, name);
++  if (element.hasAttribute(name))
++    return element.getAttribute(name);
++  return undefined;
++}
++
++/**
++ * Represents an assertion in the datasource
++ */
++class RDFAssertion {
++  constructor(subject, predicate, object) {
++    // The subject on this assertion, an RDFSubject
++    this._subject = subject;
++    // The predicate, a string
++    this._predicate = predicate;
++    // The object, an RDFNode
++    this._object = object;
++    // The datasource this assertion exists in
++    this._ds = this._subject._ds;
++    // Marks that _DOMnode is the subject's element
++    this._isSubjectElement = false;
++    // The DOM node that represents this assertion. Could be a property element,
++    // a property attribute or the subject's element for rdf:type
++    this._DOMNode = null;
++  }
++
++  getPredicate() {
++    return this._predicate;
++  }
++
++  getObject() {
++    return this._object;
++  }
++}
++
++class RDFNode {
++  equals(rdfnode) {
++    return (rdfnode.constructor === this.constructor &&
++            rdfnode._value == this._value);
++  }
++}
++
++/**
++ * A simple literal value
++ */
++class RDFLiteral extends RDFNode {
++  constructor(value) {
++    super();
++    this._value = value;
++  }
++
++  getValue() {
++    return this._value;
++  }
++}
++
++/**
++ * This is an RDF node that can be a subject so a resource or a blank node
++ */
++class RDFSubject extends RDFNode {
++  constructor(ds) {
++    super();
++    // A lookup of the assertions with this as the subject. Keyed on predicate
++    this._assertions = {};
++    // A lookup of the assertions with this as the object. Keyed on predicate
++    this._backwards = {};
++    // The datasource this subject belongs to
++    this._ds = ds;
++    // The DOM elements in the document that represent this subject. Array of Element
++    this._elements = [];
++  }
++
++  /**
++   * Parses the given Element from the DOM document
++   */
++  /* eslint-disable complexity */
++  _parseElement(element) {
++    this._elements.push(element);
++
++    // There might be an inferred rdf:type assertion in the element name
++    if (element.namespaceURI != NS_RDF ||
++        element.localName != "Description") {
++      var assertion = new RDFAssertion(this, RDF_R("type"),
++                                       this._ds.getResource(element.namespaceURI + element.localName));
++      assertion._DOMnode = element;
++      assertion._isSubjectElement = true;
++      this._addAssertion(assertion);
++    }
++
++    // Certain attributes can be literal properties
++    for (let attr of element.attributes) {
++      if (attr.namespaceURI == NS_XML || attr.namespaceURI == NS_XMLNS ||
++          attr.nodeName == "xmlns")
++        continue;
++      if ((attr.namespaceURI == NS_RDF || !attr.namespaceURI) &&
++          (["nodeID", "about", "resource", "ID", "parseType"].includes(attr.localName)))
++        continue;
++      var object = null;
++      if (attr.namespaceURI == NS_RDF) {
++        if (attr.localName == "type")
++          object = this._ds.getResource(attr.nodeValue);
++      }
++      if (!object)
++        object = new RDFLiteral(attr.nodeValue);
++      assertion = new RDFAssertion(this, attr.namespaceURI + attr.localName, object);
++      assertion._DOMnode = attr;
++      this._addAssertion(assertion);
++    }
++
++    var child = element.firstChild;
++    element.listCounter = 1;
++    while (child) {
++      if (isElement(child)) {
++        object = null;
++        var predicate = child.namespaceURI + child.localName;
++        if (child.namespaceURI == NS_RDF) {
++          if (child.localName == "li") {
++            predicate = RDF_R(`_${element.listCounter}`);
++            element.listCounter++;
++          }
++        }
++
++        // Check for and bail out on unknown attributes on the property element
++        for (let attr of child.attributes) {
++          // Ignore XML namespaced attributes
++          if (attr.namespaceURI == NS_XML)
++            continue;
++          // These are reserved by XML for future use
++          if (attr.localName.substring(0, 3).toLowerCase() == "xml")
++            continue;
++          // We can handle these RDF attributes
++          if ((!attr.namespaceURI || attr.namespaceURI == NS_RDF) &&
++              ["resource", "nodeID"].includes(attr.localName))
++            continue;
++          // This is a special attribute we handle for compatibility with Mozilla RDF
++          if (attr.namespaceURI == NS_NC &&
++              attr.localName == "parseType")
++            continue;
++        }
++
++        var parseType = child.getAttributeNS(NS_NC, "parseType");
++
++        var resource = getRDFAttribute(child, "resource");
++        var nodeID = getRDFAttribute(child, "nodeID");
++
++        if (resource !== undefined) {
++          var base = Services.io.newURI(element.baseURI);
++          object = this._ds.getResource(base.resolve(resource));
++        } else if (nodeID !== undefined) {
++          object = this._ds.getBlankNode(nodeID);
++        } else {
++          var hasText = false;
++          var childElement = null;
++          var subchild = child.firstChild;
++          while (subchild) {
++            if (isText(subchild) && /\S/.test(subchild.nodeValue)) {
++              hasText = true;
++            } else if (isElement(subchild)) {
++              childElement = subchild;
++            }
++            subchild = subchild.nextSibling;
++          }
++
++          if (childElement) {
++            object = this._ds._getSubjectForElement(childElement);
++            object._parseElement(childElement);
++          } else
++            object = new RDFLiteral(child.textContent);
++        }
++
++        assertion = new RDFAssertion(this, predicate, object);
++        this._addAssertion(assertion);
++        assertion._DOMnode = child;
++      }
++      child = child.nextSibling;
++    }
++  }
++  /* eslint-enable complexity */
++
++  /**
++   * Adds a new assertion to the internal hashes. Should be called for every
++   * new assertion parsed or created programmatically.
++   */
++  _addAssertion(assertion) {
++    var predicate = assertion.getPredicate();
++    if (predicate in this._assertions)
++      this._assertions[predicate].push(assertion);
++    else
++      this._assertions[predicate] = [ assertion ];
++
++    var object = assertion.getObject();
++    if (object instanceof RDFSubject) {
++      // Create reverse assertion
++      if (predicate in object._backwards)
++        object._backwards[predicate].push(assertion);
++      else
++        object._backwards[predicate] = [ assertion ];
++    }
++  }
++
++  /**
++   * Returns all objects in assertions with this subject and the given predicate.
++   */
++  getObjects(predicate) {
++    if (predicate in this._assertions)
++      return Array.from(this._assertions[predicate],
++                        i => i.getObject());
++
++    return [];
++  }
++
++  /**
++   * Retrieves the first property value for the given predicate.
++   */
++  getProperty(predicate) {
++    if (predicate in this._assertions)
++      return this._assertions[predicate][0].getObject();
++    return null;
++  }
++}
++
++/**
++ * Creates a new RDFResource for the datasource. Private.
++ */
++class RDFResource extends RDFSubject {
++  constructor(ds, uri) {
++    super(ds);
++    // This is the uri that the resource represents.
++    this._uri = uri;
++  }
++}
++
++/**
++ * Creates a new blank node. Private.
++ */
++class RDFBlankNode extends RDFSubject {
++  constructor(ds, nodeID) {
++    super(ds);
++    // The nodeID of this node. May be null if there is no ID.
++    this._nodeID = nodeID;
++  }
++
++  /**
++   * Sets attributes on the DOM element to mark it as representing this node
++   */
++  _applyToElement(element) {
++    if (!this._nodeID)
++      return;
++    if (USE_RDFNS_ATTR) {
++      var prefix = this._ds._resolvePrefix(element, RDF_R("nodeID"));
++      element.setAttributeNS(prefix.namespaceURI, prefix.qname, this._nodeID);
++    } else {
++      element.setAttribute("nodeID", this._nodeID);
++    }
++  }
++
++  /**
++   * Creates a new Element in the document for holding assertions about this
++   * subject. The URI controls what tagname to use.
++   */
++  _createNewElement(uri) {
++    // If there are already nodes representing this in the document then we need
++    // a nodeID to match them
++    if (!this._nodeID && this._elements.length > 0) {
++      this._ds._createNodeID(this);
++      for (let element of this._elements)
++        this._applyToElement(element);
++    }
++
++    return super._createNewElement.call(uri);
++  }
++
++  /**
++   * Adds a reference to this node to the given property Element.
++   */
++  _addReferenceToElement(element) {
++    if (this._elements.length > 0 && !this._nodeID) {
++      // In document elsewhere already
++      // Create a node ID and update the other nodes referencing
++      this._ds._createNodeID(this);
++      for (let element of this._elements)
++        this._applyToElement(element);
++    }
++
++    if (this._nodeID) {
++      if (USE_RDFNS_ATTR) {
++        let prefix = this._ds._resolvePrefix(element, RDF_R("nodeID"));
++        element.setAttributeNS(prefix.namespaceURI, prefix.qname, this._nodeID);
++      } else {
++        element.setAttribute("nodeID", this._nodeID);
++      }
++    } else {
++      // Add the empty blank node, this is generally right since further
++      // assertions will be added to fill this out
++      var newelement = this._ds._addElement(element, RDF_R("Description"));
++      newelement.listCounter = 1;
++      this._elements.push(newelement);
++    }
++  }
++
++    /**
++     * Removes any reference to this node from the given property Element.
++     */
++    _removeReferenceFromElement(element) {
++      if (element.hasAttributeNS(NS_RDF, "nodeID"))
++        element.removeAttributeNS(NS_RDF, "nodeID");
++      if (element.hasAttribute("nodeID"))
++        element.removeAttribute("nodeID");
++    }
++
++  getNodeID() {
++    return this._nodeID;
++  }
++}
++
++/**
++ * Creates a new RDFDataSource from the given document. The document will be
++ * changed as assertions are added and removed to the RDF. Pass a null document
++ * to start with an empty graph.
++ */
++class RDFDataSource {
++  constructor(document) {
++    // All known resources, indexed on URI
++    this._resources = {};
++    // All blank nodes
++    this._allBlankNodes = [];
++
++    // The underlying DOM document for this datasource
++    this._document = document;
++    this._parseDocument();
++  }
++
++  static loadFromString(text) {
++    let parser = new DOMParser();
++    let document = parser.parseFromString(text, "application/xml");
++
++    return new this(document);
++  }
++
++  /**
++   * Returns an rdf subject for the given DOM Element. If the subject has not
++   * been seen before a new one is created.
++   */
++  _getSubjectForElement(element) {
++    var about = getRDFAttribute(element, "about");
++
++    if (about !== undefined) {
++      let base = Services.io.newURI(element.baseURI);
++      return this.getResource(base.resolve(about));
++    }
++    return this.getBlankNode(null);
++  }
++
++  /**
++   * Parses the document for subjects at the top level.
++   */
++  _parseDocument() {
++    var domnode = this._document.documentElement.firstChild;
++    while (domnode) {
++      if (isElement(domnode)) {
++        var subject = this._getSubjectForElement(domnode);
++        subject._parseElement(domnode);
++      }
++      domnode = domnode.nextSibling;
++    }
++  }
++
++  /**
++   * Gets a blank node. nodeID may be null and if so a new blank node is created.
++   * If a nodeID is given then the blank node with that ID is returned or created.
++   */
++  getBlankNode(nodeID) {
++    var rdfnode = new RDFBlankNode(this, nodeID);
++    this._allBlankNodes.push(rdfnode);
++    return rdfnode;
++  }
++
++  /**
++   * Gets the resource for the URI. The resource is created if it has not been
++   * used already.
++   */
++  getResource(uri) {
++    if (uri in this._resources)
++      return this._resources[uri];
++
++    var resource = new RDFResource(this, uri);
++    this._resources[uri] = resource;
++    return resource;
++  }
++}
+diff --git a/browser/base/content/userChromejs/loader/RDFManifestConverter.jsm b/browser/base/content/userChromejs/loader/RDFManifestConverter.jsm
+new file mode 100644
+index 0000000000..370c388e9d
+--- /dev/null
++++ b/browser/base/content/userChromejs/loader/RDFManifestConverter.jsm
+@@ -0,0 +1,102 @@
++ /* This Source Code Form is subject to the terms of the Mozilla Public
++ * License, v. 2.0. If a copy of the MPL was not distributed with this
++ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
++"use strict";
++
++var EXPORTED_SYMBOLS = ["InstallRDF"];
++
++ChromeUtils.defineModuleGetter(this, "RDFDataSource",
++                               "chrome://userchromejs/content/RDFDataSource.jsm");
++
++const RDFURI_INSTALL_MANIFEST_ROOT = "urn:mozilla:install-manifest";
++
++function EM_R(aProperty) {
++  return `http://www.mozilla.org/2004/em-rdf#${aProperty}`;
++}
++
++function getValue(literal) {
++  return literal && literal.getValue();
++}
++
++function getProperty(resource, property) {
++  return getValue(resource.getProperty(EM_R(property)));
++}
++
++class Manifest {
++  constructor(ds) {
++    this.ds = ds;
++  }
++
++  static loadFromString(text) {
++    return new this(RDFDataSource.loadFromString(text));
++  }
++}
++
++class InstallRDF extends Manifest {
++  _readProps(source, obj, props) {
++    for (let prop of props) {
++      let val = getProperty(source, prop);
++      if (val != null) {
++        obj[prop] = val;
++      }
++    }
++  }
++
++  _readArrayProp(source, obj, prop, target, decode = getValue) {
++    let result = Array.from(source.getObjects(EM_R(prop)),
++                            target => decode(target));
++    if (result.length) {
++      obj[target] = result;
++    }
++  }
++
++  _readArrayProps(source, obj, props, decode = getValue) {
++    for (let [prop, target] of Object.entries(props)) {
++      this._readArrayProp(source, obj, prop, target, decode);
++    }
++  }
++
++  _readLocaleStrings(source, obj) {
++    this._readProps(source, obj, ["name", "description", "creator", "homepageURL"]);
++    this._readArrayProps(source, obj, {
++      locale: "locales",
++      developer: "developers",
++      translator: "translators",
++      contributor: "contributors",
++    });
++  }
++
++  decode() {
++    let root = this.ds.getResource(RDFURI_INSTALL_MANIFEST_ROOT);
++    let result = {};
++
++    let props = ["id", "version", "type", "updateURL", "optionsURL",
++                 "optionsType", "aboutURL", "iconURL",
++                 "bootstrap", "unpack", "strictCompatibility"];
++    this._readProps(root, result, props);
++
++    let decodeTargetApplication = source => {
++      let app = {};
++      this._readProps(source, app, ["id", "minVersion", "maxVersion"]);
++      return app;
++    };
++
++    let decodeLocale = source => {
++      let localized = {};
++      this._readLocaleStrings(source, localized);
++      return localized;
++    };
++
++    this._readLocaleStrings(root, result);
++
++    this._readArrayProps(root, result, {"targetPlatform": "targetPlatforms"});
++    this._readArrayProps(root, result, {"targetApplication": "targetApplications"},
++                         decodeTargetApplication);
++    this._readArrayProps(root, result, {"localized": "localized"},
++                         decodeLocale);
++    this._readArrayProps(root, result, {"dependency": "dependencies"},
++                         source => getProperty(source, "id"));
++
++    return result;
++  }
++}
+diff --git a/browser/base/content/userChromejs/loader/userChrome.jsm b/browser/base/content/userChromejs/loader/userChrome.jsm
+new file mode 100644
+index 0000000000..460ed36803
+--- /dev/null
++++ b/browser/base/content/userChromejs/loader/userChrome.jsm
+@@ -0,0 +1,222 @@
++let EXPORTED_SYMBOLS = [];
++
++const { Services } = ChromeUtils.import('resource://gre/modules/Services.jsm');
++const { xPref } = ChromeUtils.import('chrome://userchromejs/content/xPref.jsm');
++const { Management } = ChromeUtils.import('resource://gre/modules/Extension.jsm');
++const { AppConstants } = ChromeUtils.import('resource://gre/modules/AppConstants.jsm');
++
++let UC = {
++  webExts: new Map(),
++  sidebar: new Map()
++};
++
++let _uc = {
++  ALWAYSEXECUTE: 'rebuild_userChrome.uc.js',
++  BROWSERCHROME: AppConstants.MOZ_APP_NAME == 'thunderbird' ? 'chrome://messenger/content/messenger.xhtml' : 'chrome://browser/content/browser.xhtml',
++  BROWSERTYPE: AppConstants.MOZ_APP_NAME == 'thunderbird' ? 'mail:3pane' : 'navigator:browser',
++  BROWSERNAME: AppConstants.MOZ_APP_NAME.charAt(0).toUpperCase() + AppConstants.MOZ_APP_NAME.slice(1),
++  PREF_ENABLED: 'userChromeJS.enabled',
++  PREF_SCRIPTSDISABLED: 'userChromeJS.scriptsDisabled',
++
++  chromedir: Services.dirsvc.get('UChrm', Ci.nsIFile),
++  scriptsDir: '',
++
++  sss: Cc["@mozilla.org/content/style-sheet-service;1"].getService(Ci.nsIStyleSheetService),
++
++  getScripts: function () {
++    this.scripts = {};
++    let files = this.chromedir.directoryEntries.QueryInterface(Ci.nsISimpleEnumerator);
++    while (files.hasMoreElements()) {
++      let file = files.getNext().QueryInterface(Ci.nsIFile);
++      if (/\.uc\.js$/i.test(file.leafName)) {
++        _uc.getScriptData(file);
++      }
++    }
++  },
++
++  getScriptData: function (aFile) {
++    let aContent = this.readFile(aFile);
++    let header = (aContent.match(/^\/\/ ==UserScript==\s*\n(?:.*\n)*?\/\/ ==\/UserScript==\s*\n/m) || [''])[0];
++    let match, rex = {
++      include: [],
++      exclude: []
++    };
++    let findNextRe = /^\/\/ @(include|exclude)\s+(.+)\s*$/gm;
++    while ((match = findNextRe.exec(header))) {
++      rex[match[1]].push(match[2].replace(/^main$/i, _uc.BROWSERCHROME).replace(/\*/g, '.*?'));
++    }
++    if (!rex.include.length) {
++      rex.include.push(_uc.BROWSERCHROME);
++    }
++    let exclude = rex.exclude.length ? '(?!' + rex.exclude.join('$|') + '$)' : '';
++
++    let def = ['', ''];
++    let author = (header.match(/\/\/ @author\s+(.+)\s*$/im) || def)[1];
++    let filename = aFile.leafName || '';
++
++    return this.scripts[filename] = {
++      filename: filename,
++      file: aFile,
++      url: Services.io.getProtocolHandler('file').QueryInterface(Ci.nsIFileProtocolHandler).getURLSpecFromDir(this.chromedir) + filename,
++      name: (header.match(/\/\/ @name\s+(.+)\s*$/im) || def)[1],
++      description: (header.match(/\/\/ @description\s+(.+)\s*$/im) || def)[1],
++      version: (header.match(/\/\/ @version\s+(.+)\s*$/im) || def)[1],
++      author: (header.match(/\/\/ @author\s+(.+)\s*$/im) || def)[1],
++      regex: new RegExp('^' + exclude + '(' + (rex.include.join('|') || '.*') + ')$', 'i'),
++      id: (header.match(/\/\/ @id\s+(.+)\s*$/im) || ['', filename.split('.uc.js')[0] + '@' + (author || 'userChromeJS')])[1],
++      homepageURL: (header.match(/\/\/ @homepageURL\s+(.+)\s*$/im) || def)[1],
++      downloadURL: (header.match(/\/\/ @downloadURL\s+(.+)\s*$/im) || def)[1],
++      updateURL: (header.match(/\/\/ @updateURL\s+(.+)\s*$/im) || def)[1],
++      optionsURL: (header.match(/\/\/ @optionsURL\s+(.+)\s*$/im) || def)[1],
++      startup: (header.match(/\/\/ @startup\s+(.+)\s*$/im) || def)[1],
++      shutdown: (header.match(/\/\/ @shutdown\s+(.+)\s*$/im) || def)[1],
++      onlyonce: /\/\/ @onlyonce\b/.test(header),
++      isRunning: false,
++      get isEnabled() {
++        return (xPref.get(_uc.PREF_SCRIPTSDISABLED) || '').split(',').indexOf(this.filename) == -1;
++      }
++    }
++  },
++
++  readFile: function (aFile, metaOnly = false) {
++    let stream = Cc['@mozilla.org/network/file-input-stream;1'].createInstance(Ci.nsIFileInputStream);
++    stream.init(aFile, 0x01, 0, 0);
++    let cvstream = Cc['@mozilla.org/intl/converter-input-stream;1'].createInstance(Ci.nsIConverterInputStream);
++    cvstream.init(stream, 'UTF-8', 1024, Ci.nsIConverterInputStream.DEFAULT_REPLACEMENT_CHARACTER);
++    let content = '',
++        data = {};
++    while (cvstream.readString(4096, data)) {
++      content += data.value;
++      if (metaOnly && content.indexOf('// ==/UserScript==') > 0) {
++        break;
++      }
++    }
++    cvstream.close();
++    return content.replace(/\r\n?/g, '\n');
++  },
++
++  everLoaded: [],
++  
++  loadScript: function (script, win) {
++    if (!script.regex.test(win.location.href) || (script.filename != this.ALWAYSEXECUTE && !script.isEnabled)) {
++      return;
++    }
++
++    if (script.onlyonce && script.isRunning) {
++      if (script.startup) {
++        eval(script.startup);
++      }
++      return;
++    }
++
++    try {
++      Services.scriptloader.loadSubScript(script.url + '?' + script.file.lastModifiedTime,
++                                          script.onlyonce ? { window: win } : win);
++      script.isRunning = true;
++      if (script.startup) {
++        eval(script.startup);
++      }
++      if (!script.shutdown) {
++        this.everLoaded.push(script.id);
++      }
++    } catch (ex) {
++      Cu.reportError(ex);
++    }
++  },
++
++  windows: function (fun, onlyBrowsers = true) {
++    let windows = Services.wm.getEnumerator(onlyBrowsers ? this.BROWSERTYPE : null);
++    while (windows.hasMoreElements()) {
++      let win = windows.getNext();
++      if (!win._uc)
++        continue;
++      if (!onlyBrowsers) {
++        let frames = win.docShell.getAllDocShellsInSubtree(Ci.nsIDocShellTreeItem.typeAll, Ci.nsIDocShell.ENUMERATE_FORWARDS);
++        let res = frames.some(frame => {
++          let fWin = frame.domWindow;
++          let {document, location} = fWin;
++          if (fun(document, fWin, location))
++            return true;
++        });
++        if (res)
++          break;
++      } else {
++        let {document, location} = win;
++        if (fun(document, win, location))
++          break;
++      }
++    }
++  },
++
++  createElement: function (doc, tag, atts, XUL = true) {
++    let el = XUL ? doc.createXULElement(tag) : doc.createElement(tag);
++    for (let att in atts) {
++      el.setAttribute(att, atts[att]);
++    }
++    return el
++  }
++};
++
++if (xPref.get(_uc.PREF_ENABLED) === undefined) {
++  xPref.set(_uc.PREF_ENABLED, true, true);
++}
++
++if (xPref.get(_uc.PREF_SCRIPTSDISABLED) === undefined) {
++  xPref.set(_uc.PREF_SCRIPTSDISABLED, '', true);
++}
++
++let UserChrome_js = {
++  observe: function (aSubject) {
++    aSubject.addEventListener('DOMContentLoaded', this, {once: true});
++  },
++
++  handleEvent: function (aEvent) {
++    let document = aEvent.originalTarget;
++    let window = document.defaultView;
++    let location = window.location;
++
++    if (!this.sharedWindowOpened && location.href == 'chrome://extensions/content/dummy.xhtml') {
++      this.sharedWindowOpened = true;
++
++      Management.on('extension-browser-inserted', function (topic, browser) {
++        browser.messageManager.addMessageListener('Extension:ExtensionViewLoaded', this.messageListener.bind(this));
++      }.bind(this));
++    } else if (/^(chrome:(?!\/\/global\/content\/commonDialog\.x?html)|about:(?!blank))/i.test(location.href)) {
++      window.UC = UC;
++      window._uc = _uc;
++      window.xPref = xPref;
++      if (window._gBrowser) // bug 1443849
++        window.gBrowser = window._gBrowser;
++
++      if (xPref.get(_uc.PREF_ENABLED)) {
++        Object.values(_uc.scripts).forEach(script => {
++          _uc.loadScript(script, window);
++        });
++      } else if (!UC.rebuild) {
++        _uc.loadScript(_uc.scripts[_uc.ALWAYSEXECUTE], window);
++      }
++    }
++  },
++
++  messageListener: function (msg) {
++    const browser = msg.target;
++    const { addonId } = browser._contentPrincipal;
++
++    browser.messageManager.removeMessageListener('Extension:ExtensionViewLoaded', this.messageListener);
++
++    if (browser.ownerGlobal.location.href == 'chrome://extensions/content/dummy.xhtml') {
++      UC.webExts.set(addonId, browser);
++      Services.obs.notifyObservers(null, 'UCJS:WebExtLoaded', addonId);
++    } else {
++      let win = browser.ownerGlobal.windowRoot.ownerGlobal;
++      UC.sidebar.get(addonId)?.set(win, browser) || UC.sidebar.set(addonId, new Map([[win, browser]]));
++      Services.obs.notifyObservers(win, 'UCJS:SidebarLoaded', addonId);
++    }
++  }
++};
++
++if (!Services.appinfo.inSafeMode) {
++  _uc.chromedir.append(_uc.scriptsDir);
++  _uc.getScripts();
++  Services.obs.addObserver(UserChrome_js, 'chrome-document-global-created', false);
++}
+diff --git a/browser/base/content/userChromejs/loader/xPref.jsm b/browser/base/content/userChromejs/loader/xPref.jsm
+new file mode 100644
+index 0000000000..f6abb8cb7e
+--- /dev/null
++++ b/browser/base/content/userChromejs/loader/xPref.jsm
+@@ -0,0 +1,94 @@
++let EXPORTED_SYMBOLS = ['xPref'];
++
++const {Services} = ChromeUtils.import('resource://gre/modules/Services.jsm');
++
++var xPref = {
++  // Retorna o valor da preferência, seja qual for o tipo, mas não
++  // testei com tipos complexos como nsIFile, não sei como detectar
++  // uma preferência assim, na verdade nunca vi uma
++  get: function (prefPath, def = false, valueIfUndefined, setDefault = true) {
++    let sPrefs = def ?
++                   Services.prefs.getDefaultBranch(null) :
++                   Services.prefs;
++
++    try {
++      switch (sPrefs.getPrefType(prefPath)) {
++        case 0:
++          if (valueIfUndefined != undefined)
++            return this.set(prefPath, valueIfUndefined, setDefault);
++          else
++            return undefined;
++        case 32:
++          return sPrefs.getStringPref(prefPath);
++        case 64:
++          return sPrefs.getIntPref(prefPath);
++        case 128:
++          return sPrefs.getBoolPref(prefPath);
++      }
++    } catch (ex) {
++      return undefined;
++    }
++    return;
++  },
++
++  set: function (prefPath, value, def = false) {
++    let sPrefs = def ?
++                   Services.prefs.getDefaultBranch(null) :
++                   Services.prefs;
++
++    switch (typeof value) {
++      case 'string':
++        return sPrefs.setStringPref(prefPath, value) || value;
++      case 'number':
++        return sPrefs.setIntPref(prefPath, value) || value;
++      case 'boolean':
++        return sPrefs.setBoolPref(prefPath, value) || value;
++    }
++    return;
++  },
++
++  lock: function (prefPath, value) {
++    let sPrefs = Services.prefs;
++    this.lockedBackupDef[prefPath] = this.get(prefPath, true);
++    if (sPrefs.prefIsLocked(prefPath))
++      sPrefs.unlockPref(prefPath);
++
++    this.set(prefPath, value, true);
++    sPrefs.lockPref(prefPath);
++  },
++
++  lockedBackupDef: {},
++
++  unlock: function (prefPath) {
++    Services.prefs.unlockPref(prefPath);
++    let bkp = this.lockedBackupDef[prefPath];
++    if (bkp == undefined)
++      Services.prefs.deleteBranch(prefPath);
++    else
++      this.set(prefPath, bkp, true);
++  },
++
++  clear: Services.prefs.clearUserPref,
++
++  // Detecta mudanças na preferência e retorna:
++  // return[0]: valor da preferência alterada
++  // return[1]: nome da preferência alterada
++  // Guardar chamada numa var se quiser interrompê-la depois
++  addListener: function (prefPath, trat) {
++    this.observer = function (aSubject, aTopic, prefPath) {
++      return trat(xPref.get(prefPath), prefPath);
++    }
++
++    Services.prefs.addObserver(prefPath, this.observer);
++    return {
++      prefPath: prefPath,
++      observer: this.observer
++    };
++  },
++
++  // Encerra pref observer
++  // Só precisa passar a var definida quando adicionou
++  removeListener: function (obs) {
++    Services.prefs.removeObserver(obs.prefPath, obs.observer);
++  }
++}
+diff --git a/browser/base/content/userChromejs/moz.build b/browser/base/content/userChromejs/moz.build
+new file mode 100644
+index 0000000000..5001bd385f
+--- /dev/null
++++ b/browser/base/content/userChromejs/moz.build
+@@ -0,0 +1,5 @@
++# This Source Code Form is subject to the terms of the Mozilla Public
++# License, v. 2.0. If a copy of the MPL was not distributed with this
++# file, You can obtain one at http://mozilla.org/MPL/2.0/.
++
++JAR_MANIFESTS += ["jar.mn"]
+\ No newline at end of file
+diff --git a/browser/base/content/userChromejs/sidebarautohide.uc.js b/browser/base/content/userChromejs/sidebarautohide.uc.js
+new file mode 100644
+index 0000000000..7f4d64f884
+--- /dev/null
++++ b/browser/base/content/userChromejs/sidebarautohide.uc.js
+@@ -0,0 +1,133 @@
++// ==UserScript==
++// @name SidebarBoxAutoHide.uc.js
++// @author         Griever
++// @include        main
++// @license        MIT License
++// ==/UserScript==
++
++(function() {
++	if (location != 'chrome://browser/content/browser.xhtml') return;
++	try {
++
++//	メニューバーにメニュー挿入
++		let menuitem = MozXULElement.parseXULToFragment(`
++<menugroup id="sidebar-box-menu-group">
++	<menuitem id="sidebar-box-showopen-menu" type="checkbox" label="常時表示" oncommand="boxautohideset(false);"/>
++	<menuitem id="sidebar-box-autohide-menu" type="checkbox" label="自動開閉" oncommand="boxautohideset(true);"/>
++</menugroup>
++<menuseparator/>
++		`);
++		document.getElementById('menu_bookmarksSidebar').before(menuitem);
++
++//	サイドバーのヘッダーにボタン作成
++		let buttonitem = MozXULElement.parseXULToFragment(`
++<toolbarbutton id="sidebar-box-autohide-button" class="close-icon tabbable" oncommand="boxautohideset(!document.getElementById('sidebar-box').getAttribute('boxautohide'));"/>
++		`);
++		document.getElementById('sidebar-close').before(buttonitem);
++
++		let boxelm = document.getElementById('sidebar-box');
++				boxelm.setAttribute('persist', 'boxautohide');
++
++				boxelm.addEventListener('mouseenter', function() {
++						boxelm.setAttribute('open', 'true');
++				}, false);
++				boxelm.addEventListener('mousemove', function() {
++						if (!document.getElementById('sidebar-switcher-target').getAttribute('open'))
++							boxelm.removeAttribute('open');
++				}, false);
++
++//	サイドバーヘッダーのメニューが開かれてたらサイドバーが閉じないようにキープ
++		let menuelm = document.getElementById('sidebarMenu-popup');
++				menuelm.addEventListener('popupshowing', function() {
++						boxelm.setAttribute('open', 'true');
++				}, false);
++				menuelm.addEventListener('popuphiding', function() {
++						boxelm.removeAttribute('open');
++				}, false);
++
++		let uccss = `
++/* サイドバー自動開閉 */
++#sidebar-box {
++	z-index						: 1 !important;
++}
++#sidebar-splitter {
++	z-index						: 1 !important;
++	opacity						: 0 !important;
++}
++#sidebar-box #sidebar-box-autohide-button {
++	list-style-image	: url("chrome://global/skin/icons/chevron.svg") !important;
++}
++#sidebar-box[boxautohide] #sidebar-box-autohide-button {
++	list-style-image	: url("chrome://browser/skin/sidebars.svg") !important;
++}
++#sidebar-box[boxautohide] {
++	position					: relative !important;
++	overflow-x				: hidden !important;
++	border						: 1px solid var(--menu-border-color) !important;
++	color							: var(--arrowpanel-color) !important;
++	background-color	: var(--arrowpanel-background) !important;
++	box-shadow				: 4px 4px 4px -2px rgba(0, 0, 0, 0.5) !important;
++	margin-top				: 8px !important;
++	margin-bottom			: 8px !important;
++	min-width					: 6px !important;
++	max-width					: 6px !important;
++	transition				: all 100ms linear 500ms !important;
++	opacity						: 0 !important;
++}
++#sidebar-box[boxautohide]:is([open], :hover) {
++	min-width					: var(--sidebar-width) !important;
++	max-width					: var(--sidebar-width) !important;
++	transition-delay	: 300ms !important;
++	opacity						: 1 !important;
++}
++#sidebar-box[boxautohide]:not([positionend]) {
++	margin-right			: -6px !important;
++	left							: 6px !important;
++}
++#sidebar-box[boxautohide]:is([open], :hover):not([positionend]) {
++	margin-right			: calc(var(--sidebar-width) * -1) !important;
++	left							: var(--sidebar-width) !important;
++	border-radius			: 0px 12px 12px 0px !important;
++}
++#sidebar-box[boxautohide][positionend] {
++	margin-left				: -6px !important;
++	right							: 6px !important;
++}
++#sidebar-box[boxautohide][positionend]:is([open], :hover) {
++	margin-left				: calc(var(--sidebar-width) * -1) !important;
++	right							: var(--sidebar-width) !important;
++	border-radius			: 12px 0px 0px 12px !important;
++}
++		`;
++		let ucuri = makeURI('data:text/css;charset=UTF=8,' + encodeURIComponent(uccss));
++		let ucsss = Cc['@mozilla.org/content/style-sheet-service;1']
++									.getService(Ci.nsIStyleSheetService);
++				ucsss.loadAndRegisterSheet(ucuri, ucsss.AGENT_SHEET);
++
++		boxautohideset(boxelm.getAttribute('boxautohide'));
++
++	} catch(e) {};
++})();
++
++
++function boxautohideset(flag) {
++	let boxelm = document.getElementById('sidebar-box');
++	let width = boxelm.getAttribute('width');
++	let cssvW = boxelm.style.getPropertyValue("--sidebar-width").match(/[0-9]+/);
++	if (flag) {
++		width = (width < 169) ? 169 : width;
++		boxelm.setAttribute('boxautohide', true)
++		document.getElementById('sidebar-box-autohide-button').setAttribute('tooltiptext', 'サイドバーを常に表示');
++		document.getElementById('sidebar-box-autohide-menu').setAttribute('checked', 'true');
++		document.getElementById('sidebar-box-showopen-menu').removeAttribute('checked');
++	} else {
++		width = (cssvW < 169) ? 169 : cssvW;
++		boxelm.removeAttribute('boxautohide');
++		document.getElementById('sidebar-box-autohide-button').setAttribute('tooltiptext', 'サイドバーを自動開閉');
++		document.getElementById('sidebar-box-autohide-menu').removeAttribute('checked');
++		document.getElementById('sidebar-box-showopen-menu').setAttribute('checked', 'true');
++	}
++	boxelm.setAttribute('width', width);
++	boxelm.style.setProperty("--sidebar-width", width + "px");
++}
++
+-- 
+2.25.1
+

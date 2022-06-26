@@ -1,0 +1,25 @@
+From 9a3f9ea0e8d083ac60f07386201349362cba8c9b Mon Sep 17 00:00:00 2001
+From: surapunoyousei <ryosukeusuusu@gmail.com>
+Date: Sun, 26 Jun 2022 18:32:30 +0900
+Subject: [PATCH 20/24] Some about: Allow all add-ons to work on your site
+
+---
+ toolkit/components/extensions/MatchPattern.cpp | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/toolkit/components/extensions/MatchPattern.cpp b/toolkit/components/extensions/MatchPattern.cpp
+index 14f5278039..a0303e5034 100644
+--- a/toolkit/components/extensions/MatchPattern.cpp
++++ b/toolkit/components/extensions/MatchPattern.cpp
+@@ -224,7 +224,7 @@ const nsCString& CookieInfo::RawHost() const {
+  * MatchPattern
+  *****************************************************************************/
+ 
+-const char* PERMITTED_SCHEMES[] = {"http", "https", "ws",   "wss",
++const char* PERMITTED_SCHEMES[] = {"http", "https", "ws",   "wss", "about",
+                                    "file", "ftp",   "data", nullptr};
+ 
+ // Known schemes that are followed by "://" instead of ":".
+-- 
+2.25.1
+

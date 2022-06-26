@@ -1,0 +1,80 @@
+From 8c14bb9fa59ab5938e9cb1b925d109404e36c74f Mon Sep 17 00:00:00 2001
+From: surapunoyousei <ryosukeusuusu@gmail.com>
+Date: Sun, 26 Jun 2022 17:52:22 +0900
+Subject: [PATCH 03/24] Enable the official updater
+
+---
+ build/application.ini.in                        | 2 +-
+ build/moz.build                                 | 2 +-
+ toolkit/components/maintenanceservice/moz.build | 2 +-
+ toolkit/modules/UpdateUtils.jsm                 | 2 ++
+ toolkit/mozapps/update/tests/moz.build          | 2 +-
+ 5 files changed, 6 insertions(+), 4 deletions(-)
+
+diff --git a/build/application.ini.in b/build/application.ini.in
+index 6df13230a4..0f082495f0 100644
+--- a/build/application.ini.in
++++ b/build/application.ini.in
+@@ -52,5 +52,5 @@ ServerURL=@MOZ_CRASHREPORTER_URL@/submit?id=@MOZ_APP_ID@&version=@MOZ_APP_VERSIO
+ 
+ #if MOZ_UPDATER
+ [AppUpdate]
+-URL=https://@MOZ_APPUPDATE_HOST@/update/6/%PRODUCT%/%VERSION%/%BUILD_ID%/%BUILD_TARGET%/%LOCALE%/%CHANNEL%/%OS_VERSION%/%SYSTEM_CAPABILITIES%/%DISTRIBUTION%/%DISTRIBUTION_VERSION%/update.xml
++URL=https://@MOZ_APPUPDATE_HOST@/data/floorp/%DISPLAY_VERSION%/update.xml
+ #endif
+diff --git a/build/moz.build b/build/moz.build
+index 671e77e97b..600883ef8b 100644
+--- a/build/moz.build
++++ b/build/moz.build
+@@ -91,7 +91,7 @@ if CONFIG["MOZ_APP_BASENAME"]:
+         if CONFIG[var]:
+             appini_defines[var] = True
+ 
+-    appini_defines["MOZ_APPUPDATE_HOST"] = "aus5.mozilla.org"
++    appini_defines["MOZ_APPUPDATE_HOST"] = "repo.ablaze.one"
+     if CONFIG["MOZ_APPUPDATE_HOST"]:
+         appini_defines["MOZ_APPUPDATE_HOST"] = CONFIG["MOZ_APPUPDATE_HOST"]
+ 
+diff --git a/toolkit/components/maintenanceservice/moz.build b/toolkit/components/maintenanceservice/moz.build
+index a4dae3f8ba..5c28e3e88b 100644
+--- a/toolkit/components/maintenanceservice/moz.build
++++ b/toolkit/components/maintenanceservice/moz.build
+@@ -18,8 +18,8 @@ USE_LIBS += [
+ ]
+ 
+ # For debugging purposes only
+-# DEFINES['DISABLE_UPDATER_AUTHENTICODE_CHECK'] = True
+ 
++DEFINES['DISABLE_UPDATER_AUTHENTICODE_CHECK'] = True
+ DEFINES["UNICODE"] = True
+ DEFINES["_UNICODE"] = True
+ DEFINES["NS_NO_XPCOM"] = True
+diff --git a/toolkit/modules/UpdateUtils.jsm b/toolkit/modules/UpdateUtils.jsm
+index 10e17cf573..35c7df030f 100644
+--- a/toolkit/modules/UpdateUtils.jsm
++++ b/toolkit/modules/UpdateUtils.jsm
+@@ -98,6 +98,8 @@ var UpdateUtils = {
+             return locale;
+           case "CHANNEL":
+             return this.UpdateChannel;
++          case "DISPLAY_VERSION":
++            return AppConstants.MOZ_APP_VERSION_DISPLAY;
+           case "PLATFORM_VERSION":
+             return Services.appinfo.platformVersion;
+           case "SYSTEM_CAPABILITIES":
+diff --git a/toolkit/mozapps/update/tests/moz.build b/toolkit/mozapps/update/tests/moz.build
+index 1a52a88b5f..0b3daff6c9 100644
+--- a/toolkit/mozapps/update/tests/moz.build
++++ b/toolkit/mozapps/update/tests/moz.build
+@@ -59,7 +59,7 @@ if CONFIG["MOZ_MAINTENANCE_SERVICE"]:
+     DEFINES["MOZ_MAINTENANCE_SERVICE"] = CONFIG["MOZ_MAINTENANCE_SERVICE"]
+ 
+ # For debugging purposes only
+-# DEFINES['DISABLE_UPDATER_AUTHENTICODE_CHECK'] = True
++ DEFINES['DISABLE_UPDATER_AUTHENTICODE_CHECK'] = True
+ 
+ if CONFIG["CC_TYPE"] == "clang-cl":
+     WIN32_EXE_LDFLAGS += ["-ENTRY:wmainCRTStartup"]
+-- 
+2.25.1
+

@@ -1,0 +1,1010 @@
+From 0f626b42dfa416afb5ee28fd9bb61aa34cfbf797 Mon Sep 17 00:00:00 2001
+From: surapunoyousei <ryosukeusuusu@gmail.com>
+Date: Sun, 26 Jun 2022 18:37:24 +0900
+Subject: [PATCH 21/24] Add a Floorp-specific search engine
+
+---
+ .../search/extensions/frea/favicon.ico        | Bin 0 -> 10544 bytes
+ .../search/extensions/frea/manifest.json      |  29 ++
+ .../search/extensions/startpage/favicon.ico   | Bin 0 -> 4286 bytes
+ .../search/extensions/startpage/manifest.json |  29 ++
+ toolkit/components/search/SearchService.jsm   | 392 ++++++------------
+ 5 files changed, 181 insertions(+), 269 deletions(-)
+ create mode 100644 browser/components/search/extensions/frea/favicon.ico
+ create mode 100644 browser/components/search/extensions/frea/manifest.json
+ create mode 100644 browser/components/search/extensions/startpage/favicon.ico
+ create mode 100644 browser/components/search/extensions/startpage/manifest.json
+
+diff --git a/browser/components/search/extensions/frea/favicon.ico b/browser/components/search/extensions/frea/favicon.ico
+new file mode 100644
+index 0000000000000000000000000000000000000000..e2883e016d49be465400f90ae5ce2e37d1f1eeb5
+GIT binary patch
+literal 10544
+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
+
+literal 0
+HcmV?d00001
+
+diff --git a/browser/components/search/extensions/frea/manifest.json b/browser/components/search/extensions/frea/manifest.json
+new file mode 100644
+index 0000000000..fddc8cff82
+--- /dev/null
++++ b/browser/components/search/extensions/frea/manifest.json
+@@ -0,0 +1,29 @@
++{
++    "name": "Frea Search",
++    "description": "Frea Search by Ablaze",
++    "manifest_version": 2,
++    "version": "1.0",
++    "applications": {
++      "gecko": {
++        "id": "frea@search.mozilla.org"
++      }
++    },
++    "hidden": true,
++    "icons": {
++      "16": "favicon.ico"
++    },
++    "web_accessible_resources": [
++      "favicon.ico"
++    ],
++    "chrome_settings_overrides": {
++      "search_provider": {
++        "keyword": ["@fs", "@frea"],
++        "name": "Frea Search",
++        "search_url": "https://freasearch.org/search",
++        "search_form": "https://freasearch.org/search?q={searchTerms}",
++        "search_url_get_params": "q={searchTerms}",
++        "suggest_url": "https://freasearch.org/autocompleter",
++        "suggest_url_get_params": "q={searchTerms}"
++      }
++    }
++  }
+diff --git a/browser/components/search/extensions/startpage/favicon.ico b/browser/components/search/extensions/startpage/favicon.ico
+new file mode 100644
+index 0000000000000000000000000000000000000000..375221e0ce629920c0e8f154732e62bb83c961b3
+GIT binary patch
+literal 4286
+zcmc&&`)?Fg6dwNp<4^vgK#kHCP<bd3NmS@VN$V?>Xbh<e1*9?BS}W8Rls3`Eia~;i
+zpa|7sc`0fO8WGY`leO8l5ZFGHDn57>w~dj$w!3pb&pER*z1_|(-CE-|r+4PwbI*6q
+zcfLE@sbO40KM4s2|2FnqXBgKThLKE0Q^o=^o|g};HC$_%HDMURKp-U)3^tj;pdv$D
+zHZ%m2E#7?=mUqa)_7eVhVobyyt~)f2{9|J4^{7xNmajR{*c^}X8F#R+4_)Wap}+Tv
+z-2WF?kugK02gdHX+=aJGR^zGkdr_8`i}Sypb#h=Id!NpgJr~dDwtuj%7n{r0AuVYN
+zQWGa5W$KOCzhfJql!F@&hVCnP;r#hpOsj`|Kd;<@jN22DmOKUN(-LI-;*(v&_!0hk
+z{C{%|(}d^f5j=MHY^r^-V5cTdLP7T9xJ){TrbRan<IRJye{S<3Co@er=ekoVhb1ZV
+z(c0_<ue-%`I3(Uitw-?0F}R0{My|!a=h1)ZB8qad9c=FXgR`gMn*)2Tx+#`ZXE?5|
+z!%^5;J{*65G}V5x1z%QGVtd8w*!o5(c5mGb&#@!uI`;=QtuJx<&9$?=UtWg5z<^U%
+zBz`PReeJZjQO;1-yje&mO{GkoB${SzXU<B(vW!$@%uI6dx#zDe&z3Xj^gMz~J-(Bd
+zRx_^$2M1BRrwUKpGgmNeJxhJbR*h*ia-VtRdDh+1MGJApcPeVn1zXRDd!yfn^EkZk
+zQ#^df42f^WrrN1CzJ6fF%`(p%q=&J2ynp&lIQa3-*k>&Q%hsUH3HQ7GL^GbeZ=QqA
+zH8TGdYYK39Up49u)kyzyvoa+gI|ugLxUL98#GM_FM>me$=GZsT-;eUbJS@EB2C0o>
+zKC@^68taZC7#Nh=_#CkD^L;~cq0}uLkv<mBpF{b#jOIV0ZaqKyn$On7-+x2?lEuin
+zYbG*DSC7uU4fS8w4s#mr5AR{F{_^`#yz*)34QqsZv}@A_Aoh3P2!3pQ9*5}6@bl_S
+z>uEGK)Qb)D_B#HNyfF{n<8`9bNAA2856zj5(ic|A_n#AY47EGHl!Ib^?GIh+Ya_11
+zarwLUC(?XdOEX$qn(#|Uo17o<b;H)?M%2Tcb#}n~?hwr8A7HloV0QoMj<3aF9I(+G
+zo8mQnovufmvB-7WE4flXm8TvkSPm4f1Xizt`nHDJ?Ed_AxS;2wI#><0{T<7yK7i?`
+zyyMjX<8=6dqUWp}@|Qtv+X%D2&z%F#oA-472oygL<Si9b<!fQ~bVuJ~*Bd!<zCC`Z
+zH(v!_%%L1sKv6EL@q71L*#FAkP&?nV{9jrD<mW(DeF!rUh>oxKCNc-QSGAu}Jn8|*
+zqh6@>g)lwGVbb4n!l~U4`rcF3A4#ti_l%A5HBYr%y=N}C(oe35;^M8>91etwHMvk*
+zDxkjFFPcz$E1}9uEKK5wxne)Hn`)<Ln4^toINH2^2IQJ^@SOxo3x|2-+PEjSkv333
+z_skI+W4~Jgv+I(3uQa?d=jJ;BW%I!CIR_gr+#AW~<!4C)TZp#{6Nk<DN-r)z)f^B_
+ziWbATiq5B6n<qUn>C8IX7*CzC_HYio-tCvODLQO82D8Zn^K2*SKdi}EF`}=H{T+z&
+zAl-*p`?k@X=q1|oOgm@n=jhDx=XXDT2aHRrSMwk7oQ)mZ8=`k$isvPZ|NT35>{vB1
+PRuko!V*elD{~G@RD_3TY
+
+literal 0
+HcmV?d00001
+
+diff --git a/browser/components/search/extensions/startpage/manifest.json b/browser/components/search/extensions/startpage/manifest.json
+new file mode 100644
+index 0000000000..933030ebaf
+--- /dev/null
++++ b/browser/components/search/extensions/startpage/manifest.json
+@@ -0,0 +1,29 @@
++{
++    "name": "Startpage",
++    "description": "Startpage Search Engine",
++    "manifest_version": 2,
++    "version": "1.0",
++    "applications": {
++      "gecko": {
++        "id": "startpage@search.mozilla.org"
++      }
++    },
++    "hidden": true,
++    "icons": {
++      "16": "favicon.ico"
++    },
++    "web_accessible_resources": [
++      "favicon.ico"
++    ],
++    "chrome_settings_overrides": {
++      "search_provider": {
++        "keyword": "@st",
++        "name": "StartPage",
++        "search_url": "https://www.startpage.com/sp/search",
++        "search_form": "https://www.startpage.com/",
++        "search_url_post_params": "query={searchTerms}&segment=startpage.waterfox.1",
++        "suggest_url": "https://www.startpage.com/suggestions",
++        "suggest_url_get_params": "q={searchTerms}&format=opensearch"
++      }
++    }
++  }
+\ No newline at end of file
+diff --git a/toolkit/components/search/SearchService.jsm b/toolkit/components/search/SearchService.jsm
+index d0c990126d..a9302681d8 100644
+--- a/toolkit/components/search/SearchService.jsm
++++ b/toolkit/components/search/SearchService.jsm
+@@ -27,6 +27,16 @@ XPCOMUtils.defineLazyModuleGetters(this, {
+   NimbusFeatures: "resource://nimbus/ExperimentAPI.jsm",
+ });
+ 
++XPCOMUtils.defineLazyPreferenceGetter(
++  this,
++  "gExperiment",
++  SearchUtils.BROWSER_SEARCH_PREF + "experiment",
++  false,
++  () => {
++    Services.search.wrappedJSObject._maybeReloadEngines();
++  }
++);
++
+ XPCOMUtils.defineLazyGetter(this, "logConsole", () => {
+   return console.createInstance({
+     prefix: "SearchService",
+@@ -239,16 +249,9 @@ SearchService.prototype = {
+     Services.obs.addObserver(this, Region.REGION_TOPIC);
+ 
+     try {
+-      // Create the search engine selector.
+-      this._engineSelector = new SearchEngineSelector(
+-        this._handleConfigurationUpdated.bind(this)
+-      );
+-
+       // See if we have a settings file so we don't have to parse a bunch of XML.
+       let settings = await this._settings.get();
+ 
+-      this._setupRemoteSettings().catch(Cu.reportError);
+-
+       await this._loadEngines(settings);
+ 
+       // If we've got this far, but the application is now shutting down,
+@@ -272,7 +275,7 @@ SearchService.prototype = {
+       this._addObservers();
+     } catch (ex) {
+       this._initRV = ex.result !== undefined ? ex.result : Cr.NS_ERROR_FAILURE;
+-      logConsole.error("_init: failure initializing search:", ex);
++      logConsole.error("_init: failure initializing search:", ex.result);
+     }
+ 
+     this._initialized = true;
+@@ -524,7 +527,7 @@ SearchService.prototype = {
+ 
+     // Something unexpected as happened. In order to recover the original
+     // default engine, use the first visible engine which is the best we can do.
+-    return this._sortedVisibleEngines[0];
++    return this._getSortedEngines(false)[0];
+   },
+ 
+   /**
+@@ -560,20 +563,10 @@ SearchService.prototype = {
+    *   An object representing the search engine settings.
+    */
+   async _loadEngines(settings) {
+-    // Get user's current settings and search engine before we load engines from
+-    // config. These values will be compared after engines are loaded.
+-    let prevMetaData = { ...settings?.metaData };
+-    let prevCurrentEngine = prevMetaData.current;
+-    let prevAppDefaultEngine = prevMetaData?.appDefaultEngine;
+-
+     logConsole.debug("_loadEngines: start");
+     let { engines, privateDefault } = await this._fetchEngineSelectorEngines();
+     this._setDefaultAndOrdersFromSelector(engines, privateDefault);
+ 
+-    // We've done what we can without the add-on manager, now ensure that
+-    // it has finished starting before we continue.
+-    await AddonManager.readyPromise;
+-
+     let newEngines = await this._loadEnginesFromConfig(engines);
+     for (let engine of newEngines) {
+       this._addEngineToStore(engine);
+@@ -598,86 +591,8 @@ SearchService.prototype = {
+     this._loadEnginesMetadataFromSettings(settings.engines);
+ 
+     logConsole.debug("_loadEngines: done");
+-
+-    let newCurrentEngine = this._getEngineDefault(false)?.name;
+-    this._settings.setAttribute(
+-      "appDefaultEngine",
+-      this.originalDefaultEngine?.name
+-    );
+-
+-    if (
+-      this._shouldDisplayRemovalOfEngineNotificationBox(
+-        settings,
+-        prevMetaData,
+-        newCurrentEngine,
+-        prevCurrentEngine,
+-        prevAppDefaultEngine
+-      )
+-    ) {
+-      this._showRemovalOfSearchEngineNotificationBox(
+-        prevCurrentEngine || prevAppDefaultEngine,
+-        newCurrentEngine
+-      );
+-    }
+   },
+-  /**
+-   * Helper function to determine if the removal of search engine notification
+-   * box should be displayed.
+-   *
+-   * @param { object } settings
+-   *   The user's search engine settings.
+-   * @param { object } prevMetaData
+-   *   The user's previous search settings metadata.
+-   * @param { object } newCurrentEngine
+-   *   The user's new current default engine.
+-   * @param { object } prevCurrentEngine
+-   *   The user's previous default engine.
+-   * @param { object } prevAppDefaultEngine
+-   *   The user's previous app default engine.
+-   * @returns { boolean }
+-   *   Return true if the previous default engine has been removed and
+-   *   notification box should be displayed.
+-   */
+-  _shouldDisplayRemovalOfEngineNotificationBox(
+-    settings,
+-    prevMetaData,
+-    newCurrentEngine,
+-    prevCurrentEngine,
+-    prevAppDefaultEngine
+-  ) {
+-    if (
+-      !Services.prefs.getBoolPref("browser.search.removeEngineInfobar.enabled")
+-    ) {
+-      return false;
+-    }
+-
+-    // If for some reason we were unable to install any engines and hence no
+-    // default engine, do not display the notification box
+-    if (!newCurrentEngine) {
+-      return false;
+-    }
+-
+-    // If the user's previous engine is different than the new current engine,
+-    // or if the user was using the app default engine and the app default
+-    // engine is different than the new current engine, we check if the user's
+-    // settings metadata has been upddated.
+-    if (
+-      (prevCurrentEngine && prevCurrentEngine !== newCurrentEngine) ||
+-      (!prevCurrentEngine &&
+-        prevAppDefaultEngine &&
+-        prevAppDefaultEngine !== newCurrentEngine)
+-    ) {
+-      // Check settings metadata to detect an update to locale. Sometimes when
+-      // the user changes their locale it causes a change in engines.
+-      // If there is no update to settings metadata then the engine change was
+-      // caused by an update to config rather than a user changing their locale.
+-      if (!this._didSettingsMetaDataUpdate(prevMetaData)) {
+-        return true;
+-      }
+-    }
+ 
+-    return false;
+-  },
+   /**
+    * Loads engines as specified by the configuration. We only expect
+    * configured engines here, user engines should not be listed.
+@@ -751,9 +666,8 @@ SearchService.prototype = {
+ 
+   async _reloadEngines(settings) {
+     // Capture the current engine state, in case we need to notify below.
+-    let prevCurrentEngine = this._currentEngine;
+-    let prevPrivateEngine = this._currentPrivateEngine;
+-    let prevMetaData = { ...settings?.metaData };
++    const prevCurrentEngine = this._currentEngine;
++    const prevPrivateEngine = this._currentPrivateEngine;
+ 
+     // Ensure that we don't set the useSavedOrder flag whilst we're doing this.
+     // This isn't a user action, so we shouldn't be switching it.
+@@ -805,15 +719,14 @@ SearchService.prototype = {
+         }
+ 
+         policy = await this._getExtensionPolicy(engine._extensionID);
++        manifest = policy.extension.manifest;
+         locale =
+           replacementEngines[0].webExtension.locale || SearchUtils.DEFAULT_TAG;
+-        manifest = await this._getManifestForLocale(policy.extension, locale);
+-
+-        // If the name is different, then we must treat the engine as different,
+-        // and go through the remove and add cycle, rather than modifying the
+-        // existing one.
++        if (locale != SearchUtils.DEFAULT_TAG) {
++          manifest = await policy.extension.getLocalizedManifest(locale);
++        }
+         if (
+-          engine.name !=
++          manifest.name !=
+           manifest.chrome_settings_overrides.search_provider.name.trim()
+         ) {
+           // No matching name, so just remove it.
+@@ -831,8 +744,12 @@ SearchService.prototype = {
+         // This is an existing engine that we should update (we don't know if
+         // the configuration for this engine has changed or not).
+         policy = await this._getExtensionPolicy(engine._extensionID);
+-        locale = engine._locale;
+-        manifest = await this._getManifestForLocale(policy.extension, locale);
++
++        manifest = policy.extension.manifest;
++        locale = engine._locale || SearchUtils.DEFAULT_TAG;
++        if (locale != SearchUtils.DEFAULT_TAG) {
++          manifest = await policy.extension.getLocalizedManifest(locale);
++        }
+       }
+       engine._updateFromManifest(
+         policy.extension.id,
+@@ -863,21 +780,6 @@ SearchService.prototype = {
+     // Now set the sort out the default engines and notify as appropriate.
+     this._currentEngine = null;
+     this._currentPrivateEngine = null;
+-    // If the user's default is one of the private engines that is being removed,
+-    // reset the stored setting, so that we correctly detect the change in
+-    // in default.
+-    if (
+-      prevCurrentEngine &&
+-      enginesToRemove.some(e => e.name == prevCurrentEngine.name)
+-    ) {
+-      this._settings.setAttribute("current", "");
+-    }
+-    if (
+-      prevPrivateEngine &&
+-      enginesToRemove.some(e => e.name == prevPrivateEngine.name)
+-    ) {
+-      this._settings.setAttribute("private", "");
+-    }
+ 
+     this._setDefaultAndOrdersFromSelector(
+       originalConfigEngines,
+@@ -899,20 +801,7 @@ SearchService.prototype = {
+           SearchUtils.MODIFIED_TYPE.DEFAULT_PRIVATE
+         );
+       }
+-
+-      if (
+-        prevMetaData &&
+-        settings.metaData &&
+-        !this._didSettingsMetaDataUpdate(prevMetaData) &&
+-        Services.prefs.getBoolPref("browser.search.removeEngineInfobar.enabled")
+-      ) {
+-        this._showRemovalOfSearchEngineNotificationBox(
+-          prevCurrentEngine.name,
+-          this.defaultEngine.name
+-        );
+-      }
+     }
+-
+     if (
+       this._separatePrivateDefault &&
+       prevPrivateEngine &&
+@@ -966,13 +855,6 @@ SearchService.prototype = {
+       SearchUtils.notifyAction(engine, SearchUtils.MODIFIED_TYPE.REMOVED);
+     }
+ 
+-    // Save app default engine to the user's settings metaData incase it has
+-    // been updated
+-    this._settings.setAttribute(
+-      "appDefaultEngine",
+-      this.originalDefaultEngine?.name
+-    );
+-
+     this._dontSetUseSavedOrder = false;
+     // Clear out the sorted engines settings, so that we re-sort it if necessary.
+     this.__sortedEngines = null;
+@@ -998,7 +880,6 @@ SearchService.prototype = {
+     this._searchDefault = null;
+     this._searchPrivateDefault = null;
+     this._maybeReloadDebounce = false;
+-    this._settings._batchTask?.disarm();
+   },
+ 
+   _addEngineToStore(engine, skipDuplicateCheck = false) {
+@@ -1022,6 +903,42 @@ SearchService.prototype = {
+       return;
+     }
+ 
++    const typetag = Services.prefs.getCharPref("browser.search.typetag", "");
++    const hspart = Services.prefs.getCharPref("browser.search.hspart", "");
++    const hsimp = Services.prefs.getCharPref("browser.search.hsimp", "");
++    if (typetag && hspart && hsimp && engine.name == "Yahoo!") {
++      const mainURL = "https://search.yahoo.com/yhs/search?q={searchTerms}";
++      engine.__searchForm =
++        mainURL + `&hspart=${hspart}&hsimp=${hsimp}&type=${typetag}`;
++      engine._urls[0].params[0] = {
++        name: engine._urls[0].params[0].name,
++        value: hspart,
++        purpose: undefined,
++      };
++      engine._urls[0].params[1] = {
++        name: engine._urls[0].params[1].name,
++        value: hsimp,
++        purpose: undefined,
++      };
++      engine._urls[0].params.unshift({
++        name: "type",
++        value: typetag,
++        purpose: undefined,
++      });
++    }
++
++    const sp = Services.prefs.getCharPref("distribution.engine", "");
++    if (sp == "Startpage" && engine.name == "Startpage") {
++      const mainURL = "https://www.startpage.com/do/search?q={searchTerms}";
++      const segment = "startpage.search.mozilla.org.default";
++      engine.__searchForm = mainURL + `&segment=${segment}`;
++      engine._urls[0].params[1] = {
++        name: "segment",
++        value: segment,
++        purpose: undefined,
++      };
++    }
++
+     if (engine._engineToUpdate) {
+       // We need to replace engineToUpdate with the engine that just loaded.
+       var oldEngine = engine._engineToUpdate;
+@@ -1166,26 +1083,22 @@ SearchService.prototype = {
+   },
+ 
+   async _fetchEngineSelectorEngines() {
+-    let searchEngineSelectorProperties = {
+-      locale: Services.locale.appLocaleAsBCP47,
+-      region: Region.home || "default",
+-      channel: AppConstants.MOZ_APP_VERSION_DISPLAY.endsWith("esr")
+-        ? "esr"
+-        : AppConstants.MOZ_UPDATE_CHANNEL,
+-      experiment: NimbusFeatures.search.getVariable("experiment") ?? "",
+-      distroID: SearchUtils.distroID ?? "",
+-    };
+-
+-    for (let [key, value] of Object.entries(searchEngineSelectorProperties)) {
+-      this._settings.setAttribute(key, value);
+-    }
+-
+-    let {
+-      engines,
+-      privateDefault,
+-    } = await this._engineSelector.fetchEngineConfiguration(
+-      searchEngineSelectorProperties
+-    );
++    let locale = Services.locale.appLocaleAsBCP47;
++    let region = Region.home || "default";
++
++    let channel = AppConstants.MOZ_APP_VERSION_DISPLAY.endsWith("esr")
++      ? "esr"
++      : AppConstants.MOZ_UPDATE_CHANNEL;
++
++    const engines = [
++      { webExtension: { id: "google@search.mozilla.org" }, orderHint: 100 },
++      { webExtension: { id: "frea@search.mozilla.org" }, orderHint: 90 },
++      { webExtension: { id: "startpage@search.mozilla.org" }, orderHint: 70 },
++      { webExtension: { id: "ddg@search.mozilla.org" }, orderHint: 60 },
++      { webExtension: { id: "ecosia@search.mozilla.org" }, orderHint: 50 },
++      { webExtension: { id: "wikipedia@search.mozilla.org" }, orderHint: 40 },
++      { webExtension: { id: "bing@search.mozilla.org" }, orderHint: 30 },
++    ];
+ 
+     for (let e of engines) {
+       if (!e.webExtension) {
+@@ -1194,6 +1107,12 @@ SearchService.prototype = {
+       e.webExtension.locale = e.webExtension?.locale ?? SearchUtils.DEFAULT_TAG;
+     }
+ 
++    let privateDefault = {
++      webExtension: { id: "startpage@search.mozilla.org" },
++    };
++    privateDefault.webExtension.locale =
++      privateDefault.webExtension?.locale ?? SearchUtils.DEFAULT_TAG;
++
+     return { engines, privateDefault };
+   },
+ 
+@@ -1218,7 +1137,7 @@ SearchService.prototype = {
+     // use the user's order information stored in settings.
+     this._settings.setAttribute("useSavedOrder", true);
+ 
+-    var engines = this._sortedEngines;
++    var engines = this._getSortedEngines(true);
+ 
+     for (var i = 0; i < engines.length; ++i) {
+       engines[i].setAttr("order", i + 1);
+@@ -1351,15 +1270,21 @@ SearchService.prototype = {
+   },
+ 
+   /**
+-   * Get a sorted array of the visible engines.
++   * Get a sorted array of engines.
++   *
++   * @param {boolean} withHidden
++   *   True if hidden plugins should be included in the result.
+    * @returns {Array<SearchEngine>}
++   *   The sorted array.
+    */
++  _getSortedEngines(withHidden) {
++    if (withHidden) {
++      return this._sortedEngines;
++    }
+ 
+-  get _sortedVisibleEngines() {
+-    this.__sortedVisibleEngines = this._sortedEngines.filter(
+-      engine => !engine.hidden
+-    );
+-    return this.__sortedVisibleEngines;
++    return this._sortedEngines.filter(function(engine) {
++      return !engine.hidden;
++    });
+   },
+ 
+   // nsISearchService
+@@ -1544,13 +1469,13 @@ SearchService.prototype = {
+   async getEngines() {
+     await this.init();
+     logConsole.debug("getEngines: getting all engines");
+-    return this._sortedEngines;
++    return this._getSortedEngines(true);
+   },
+ 
+   async getVisibleEngines() {
+     await this.init(true);
+     logConsole.debug("getVisibleEngines: getting all visible engines");
+-    return this._sortedVisibleEngines;
++    return this._getSortedEngines(false);
+   },
+ 
+   async getAppProvidedEngines() {
+@@ -1568,7 +1493,7 @@ SearchService.prototype = {
+ 
+   _getEnginesByExtensionID(extensionID) {
+     logConsole.debug("getEngines: getting all engines for", extensionID);
+-    var engines = this._sortedEngines.filter(function(engine) {
++    var engines = this._getSortedEngines(true).filter(function(engine) {
+       return engine._extensionID == extensionID;
+     });
+     return engines;
+@@ -1834,8 +1759,11 @@ SearchService.prototype = {
+     let extensionEngines = await this.getEnginesByExtensionID(extension.id);
+ 
+     for (let engine of extensionEngines) {
++      let manifest = extension.manifest;
+       let locale = engine._locale || SearchUtils.DEFAULT_TAG;
+-      let manifest = await this._getManifestForLocale(extension, locale);
++      if (locale != SearchUtils.DEFAULT_TAG) {
++        manifest = await extension.getLocalizedManifest(locale);
++      }
+       let configuration =
+         engines.find(
+           e =>
+@@ -1891,7 +1819,10 @@ SearchService.prototype = {
+         ? config.webExtension.locale
+         : SearchUtils.DEFAULT_TAG;
+ 
+-    let manifest = await this._getManifestForLocale(policy.extension, locale);
++    let manifest = policy.extension.manifest;
++    if (locale != SearchUtils.DEFAULT_TAG) {
++      manifest = await policy.extension.getLocalizedManifest(locale);
++    }
+ 
+     let engine = new SearchEngine({
+       name: manifest.chrome_settings_overrides.search_provider.name.trim(),
+@@ -1912,7 +1843,10 @@ SearchService.prototype = {
+     logConsole.debug("installExtensionEngine:", extension.id);
+ 
+     let installLocale = async locale => {
+-      let manifest = await this._getManifestForLocale(extension, locale);
++      let manifest =
++        locale == SearchUtils.DEFAULT_TAG
++          ? extension.manifest
++          : await extension.getLocalizedManifest(locale);
+       return this._addEngineForManifest(
+         extension,
+         manifest,
+@@ -2133,7 +2067,7 @@ SearchService.prototype = {
+     //
+     // This could be further simplified by having our caller pass in
+     // newIndexEngine directly instead of newIndex.
+-    var newIndexEngine = this._sortedVisibleEngines[newIndex];
++    var newIndexEngine = this._getSortedEngines(false)[newIndex];
+     if (!newIndexEngine) {
+       throw Components.Exception(
+         "moveEngine: Can't find engine to replace!",
+@@ -2213,7 +2147,7 @@ SearchService.prototype = {
+       newDefault.hidden ||
+       newDefault.name == excludeEngineName
+     ) {
+-      let sortedEngines = this._sortedVisibleEngines;
++      let sortedEngines = this._getSortedEngines(false);
+       let generalSearchEngines = sortedEngines.filter(
+         e => e.isGeneralPurposeEngine
+       );
+@@ -2237,7 +2171,7 @@ SearchService.prototype = {
+       // even if the name is the same as the excluded one (should never happen).
+       if (!newDefault) {
+         if (!firstVisible) {
+-          sortedEngines = this._sortedEngines;
++          sortedEngines = this._getSortedEngines(true);
+           firstVisible = sortedEngines.find(e => e.isGeneralPurposeEngine);
+           if (!firstVisible) {
+             firstVisible = sortedEngines[0];
+@@ -2259,7 +2193,11 @@ SearchService.prototype = {
+     // to pick a new current engine. As soon as we return it, this new
+     // current engine will become user-visible, so we should persist it.
+     // by calling the setter.
+-    this._setEngineDefault(privateMode, newDefault);
++    if (privateMode) {
++      this.defaultPrivateEngine = newDefault;
++    } else {
++      this.defaultEngine = newDefault;
++    }
+ 
+     return this[currentEngineProp];
+   },
+@@ -2275,6 +2213,7 @@ SearchService.prototype = {
+    *   The appropriate search engine, or null if one could not be determined.
+    */
+   _getEngineDefault(privateMode) {
++    this._ensureInitialized();
+     const currentEngineProp = privateMode
+       ? "_currentPrivateEngine"
+       : "_currentEngine";
+@@ -2286,7 +2225,7 @@ SearchService.prototype = {
+     // No default loaded, so find it from settings.
+     const attributeName = privateMode ? "private" : "current";
+     let name = this._settings.getAttribute(attributeName);
+-    let engine = this._engines.get(name) || null;
++    let engine = this.getEngineByName(name);
+     if (
+       engine &&
+       (engine.isAppProvided ||
+@@ -2321,6 +2260,7 @@ SearchService.prototype = {
+    *   The search engine to select
+    */
+   _setEngineDefault(privateMode, newEngine) {
++    this._ensureInitialized();
+     // Sometimes we get wrapped nsISearchEngine objects (external XPCOM callers),
+     // and sometimes we get raw Engine JS objects (callers in this file), so
+     // handle both.
+@@ -2334,7 +2274,7 @@ SearchService.prototype = {
+       );
+     }
+ 
+-    const newCurrentEngine = this._engines.get(newEngine.name);
++    const newCurrentEngine = this.getEngineByName(newEngine.name);
+     if (!newCurrentEngine) {
+       throw Components.Exception(
+         "Can't find engine in store!",
+@@ -2411,22 +2351,18 @@ SearchService.prototype = {
+   },
+ 
+   get defaultEngine() {
+-    this._ensureInitialized();
+     return this._getEngineDefault(false);
+   },
+ 
+   set defaultEngine(newEngine) {
+-    this._ensureInitialized();
+     this._setEngineDefault(false, newEngine);
+   },
+ 
+   get defaultPrivateEngine() {
+-    this._ensureInitialized();
+     return this._getEngineDefault(this._separatePrivateDefault);
+   },
+ 
+   set defaultPrivateEngine(newEngine) {
+-    this._ensureInitialized();
+     if (!this._separatePrivateDefaultPrefValue) {
+       Services.prefs.setBoolPref(
+         SearchUtils.BROWSER_SEARCH_PREF + "separatePrivateDefault",
+@@ -2911,10 +2847,6 @@ SearchService.prototype = {
+     }
+     this._observersAdded = true;
+ 
+-    NimbusFeatures.search.onUpdate(() =>
+-      Services.search.wrappedJSObject._maybeReloadEngines()
+-    );
+-
+     Services.obs.addObserver(this, SearchUtils.TOPIC_ENGINE_MODIFIED);
+     Services.obs.addObserver(this, QUIT_APPLICATION_TOPIC);
+     Services.obs.addObserver(this, TOPIC_LOCALES_CHANGE);
+@@ -2975,10 +2907,6 @@ SearchService.prototype = {
+ 
+     this._settings.removeObservers();
+ 
+-    NimbusFeatures.search.off(() =>
+-      Services.search.wrappedJSObject._maybeReloadEngines()
+-    );
+-
+     Services.obs.removeObserver(this, SearchUtils.TOPIC_ENGINE_MODIFIED);
+     Services.obs.removeObserver(this, QUIT_APPLICATION_TOPIC);
+     Services.obs.removeObserver(this, TOPIC_LOCALES_CHANGE);
+@@ -2990,80 +2918,6 @@ SearchService.prototype = {
+     "nsIObserver",
+     "nsITimerCallback",
+   ]),
+-
+-  /**
+-   * @param {object} metaData
+-   * @returns {boolean}
+-   *    Returns true if metaData has different property values than
+-   *    the cached _metaData.
+-   */
+-  _didSettingsMetaDataUpdate(metaData) {
+-    let metaDataProperties = [
+-      "locale",
+-      "region",
+-      "channel",
+-      "experiment",
+-      "distroID",
+-    ];
+-
+-    return metaDataProperties.some(p => {
+-      return metaData?.[p] !== this._settings.getAttribute(p);
+-    });
+-  },
+-
+-  /**
+-   * Shows an infobar to notify the user their default search engine has been
+-   * removed and replaced by a new default search engine.
+-   *
+-   * @param {string} prevCurrentEngine
+-   *   The engine that was previously the default engine and is to be replaced.
+-   * @param {string} newCurrentEngine
+-   *   The engine that will be the new the default engine.
+-   */
+-  _showRemovalOfSearchEngineNotificationBox(
+-    prevCurrentEngine,
+-    newCurrentEngine
+-  ) {
+-    let win = Services.wm.getMostRecentBrowserWindow();
+-    win.BrowserSearch.removalOfSearchEngineNotificationBox(
+-      prevCurrentEngine,
+-      newCurrentEngine
+-    );
+-  },
+-
+-  /**
+-   * Get the localized manifest from the WebExtension for the given locale or
+-   * manifest default locale.
+-   *
+-   * The search service configuration overloads the add-on manager concepts of
+-   * locales, and forces particular locales within the WebExtension to be used,
+-   * ignoring the user's current locale. The user's current locale is taken into
+-   * account within the configuration, just not in the WebExtension.
+-   *
+-   * @param {object} extension
+-   *   The extension to get the manifest from.
+-   * @param {string} locale
+-   *   The locale to load from the WebExtension. If this is `DEFAULT_TAG`, then
+-   *   the default locale is loaded.
+-   * @returns {object}
+-   *   The loaded manifest.
+-   */
+-  async _getManifestForLocale(extension, locale) {
+-    let manifest = extension.manifest;
+-
+-    // If the locale we want from the WebExtension is the extension's default
+-    // then we get that from the manifest here. We do this because if we
+-    // are reloading due to the locale change, the add-on manager might not
+-    // have updated the WebExtension's manifest to the new version by the
+-    // time we hit this code.
+-    let localeToLoad =
+-      locale == SearchUtils.DEFAULT_TAG ? manifest.default_locale : locale;
+-
+-    if (localeToLoad) {
+-      manifest = await extension.getLocalizedManifest(localeToLoad);
+-    }
+-    return manifest;
+-  },
+ };
+ 
+ var engineUpdateService = {
+-- 
+2.25.1
+

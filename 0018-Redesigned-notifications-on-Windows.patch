@@ -1,0 +1,131 @@
+From 160e7293723d3ee833a48a4bbde26b205798ab17 Mon Sep 17 00:00:00 2001
+From: surapunoyousei <ryosukeusuusu@gmail.com>
+Date: Sun, 26 Jun 2022 18:28:55 +0900
+Subject: [PATCH 18/24] Redesigned notifications on Windows
+
+---
+ toolkit/components/alerts/alert.css | 114 +++++++++++++++++++---------
+ 1 file changed, 77 insertions(+), 37 deletions(-)
+
+diff --git a/toolkit/components/alerts/alert.css b/toolkit/components/alerts/alert.css
+index fd392a94d4..dbfb1ffcf7 100644
+--- a/toolkit/components/alerts/alert.css
++++ b/toolkit/components/alerts/alert.css
+@@ -1,37 +1,77 @@
+-/* This Source Code Form is subject to the terms of the Mozilla Public
+- * License, v. 2.0. If a copy of the MPL was not distributed with this
+- * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
+-
+-#alertBox[animate] {
+-  animation-duration: 20s;
+-  animation-fill-mode: both;
+-  animation-name: alert-animation;
+-}
+-
+-#alertBox[animate]:not([clicked], [closing]):hover {
+-  animation-play-state: paused;
+-}
+-
+-#alertBox:not([hasOrigin]) > box > #alertTextBox > #alertFooter,
+-#alertBox:not([hasIcon]) > box > #alertIcon,
+-#alertImage:not([src]) {
+-  display: none;
+-}
+-
+-#alertTitleBox {
+-  -moz-box-pack: center;
+-  -moz-box-align: center;
+-}
+-
+-.alertText {
+-  white-space: pre-wrap;
+-}
+-
+-@keyframes alert-animation {
+-  from {
+-    visibility: visible;
+-  }
+-  to {
+-    visibility: hidden;
+-  }
+-}
++/* This Source Code Form is subject to the terms of the Mozilla Public
++ * License, v. 2.0. If a copy of the MPL was not distributed with this
++ * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
++
++#alertBox[animate] {
++  animation-duration: 20s;
++  animation-fill-mode: both;
++  animation-name: alert-animation;
++}
++
++#alertBox[animate]:not([clicked], [closing]):hover {
++  animation-play-state: paused;
++}
++
++#alertBox:not([hasOrigin]) > box > #alertTextBox > #alertFooter,
++#alertBox:not([hasIcon]) > box > #alertIcon,
++#alertImage:not([src]) {
++  display: none;
++}
++
++#alertTitleBox {
++  -moz-box-pack: center;
++  -moz-box-align: center;
++}
++
++.alertText {
++  white-space: pre-wrap;
++}
++
++@keyframes alert-animation {
++  from {
++    visibility: visible;
++  }
++  to {
++    visibility: hidden;
++  }
++}
++
++
++#alertBox {
++  border: rgb(165, 165, 165) solid 0.1px !important;
++  background-color: rgba(241, 241, 241, 0.92)  !important;
++  color: rgba(31, 31, 31, 0.8) !important;
++}
++#alertSettings:hover, #alertSettings[open] {
++  background-color: #e0e0e0 !important;
++}
++
++@media (prefers-color-scheme: dark) {
++#alertBox {
++  border: rgb(78, 78, 78) solid 0.1px !important;
++  background-color: rgb(48, 48, 48 , 0.92) !important;
++  color: rgba(255, 255, 255, 0.800000011920929) !important;
++}
++#alertSettings:hover, #alertSettings[open] {
++  background-color: #313131 !important;
++}
++}
++
++#alertBox {
++  border-radius: 7px !important;
++  backdrop-filter: blur(10px);
++}
++#alertSettings {
++  -moz-context-properties: fill, fill-opacity !important;
++  padding: 3px !important;
++  margin: 0px 2px -3px 0px !important;
++  color: inherit !important;
++  border-radius: 4px !important;
++  transform: scale(0.91, 0.91) !important;
++}
++#alertImage {
++  border-radius: 10px !important;
++}
++#alertSourceLabel {
++  color: #00b7ff !important;
++}
+-- 
+2.25.1
+
